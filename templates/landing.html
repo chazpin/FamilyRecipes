@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <div id="loginForm" style="display: none; text-align: center;">
+        <h3>Log in to the Pinnelli Family Cookbook!</h3><br>
+            <form action="/login" method="post">
+                <div class="form-group">
+                    <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
+                </div>
+                <div class="form-group">
+                    <input class="form-control" name="password" placeholder="Password" type="password">
+                </div>
+                <button class="btn btn-primary" type="submit">Log In</button>
+            </form>
+    </div>
+    <div id="registerForm" style="display:none; text-align: center;">
+        <h3>Register with Pinnelli Family Cookbook!</h3><br>
+            <form action="/register" method="post" class="needs-validation" novalidate>
+                <div class="form-group">
+                    <input autocomplete="off" autofocus class="form-control" id="userName" name="username" placeholder="Username" type="text" onchange="nameCheck(this.value);" required>
+                    <div class="invalid-feedback">
+                        Please provide a username.
+                    </div>
+                    <small id="nameTaken" class="form-text"></small>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" id="password" name="password" placeholder="Password" type="password" onkeyup="check()" onchange="passCheck()" required>
+                    <small id="message1" class="form-text"></small>
+                    <div class="invalid-feedback">
+                        Please provide a password.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input class="form-control" id="confirmation" name="confirmation" placeholder="Confirm Password" type="password" onkeyup="check()" required>
+                    <small id="message2" class="form-text"></small>
+                    <div class="invalid-feedback">
+                        Please re-type your password.
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="register" type="submit" onclick="return Validate()">Register</button>
+            </form>
+    </div>
+    <div style="margin-top: 40px; text-align: center;">
+        <button id="btnLogin" onclick="showLogin()">Login</button>
+        <button id="btnRegister" onclick="showRegister()">Register</button>
+    </div>
+</div>
+
+<script type="text/javascript" src="static/landing.js"></script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add New Recipe
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        <br/>
+        <br/>
+        <h1 class="display-4 addNewHeader">Add a new recipe to the Pinnelli Cookbook!</h1>
+        <br/>
+        <form action="/new" method="POST" class="needs-validation" novalidate>
+            <div class="form-group row">
+                <label for="name"> Recipe Name</label>
+                <input type="text" class="form-control name" id="name" name="name" required>
+                <div class="invalid-feedback">
+                    Please provide a name for your recipe
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="author">Author</label>
+                <input type="text" class="form-control author" id="author" name="author" required>
+                <div class="invalid-feedback">
+                    Please provide the author of this recipe
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="instructions">Instructions</label>
+                <textarea type="text" class="form-control instructions" id="instructions" name="instructions" style="height: 10em;" maxlength="5000" required></textarea>
+                <div class="invalid-feedback">
+                    Please provide some instructions
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="txtPost">Photos</label>
+                <div class="input-group" style="display: inline-block">
+                    <img id="imgUpload" style="width: 140px; height: 140px;" class="img-thumbnail">
+                    <input type="hidden" name="filePath" id="filePath"></input>
+                <div class="pull-right" style="float: right">
+                    <span class="input-group-btn">
+                    <span class="btn btn-primary btn-file">
+                        Add Photo <input type="file" id="fileupload" name="file" multiple>
+                    </span>
+                    </span>
+                </div>
+                </div>
+            </div>
+            <fieldset id="addIngredients">
+                <div class="row">
+                    <label class="col-4 labelRow" for="ingredient1">Ingredient</label>
+                    <label class="col-2 offset-1 labelRow" for="amount1">Amount</label>
+                    <label class="col-2 offset-1 labelRow" for="measure1">Measure</label>
+
+                </div>
+                <div class="form-group row ingredientRow">
+                    <input type="text" class="form-control col-4 ingredient autoComp" id="ingredient1" name="ingredient1" required autocomplete="Off"/>
+                    <input type="text" class="form-control col-2 offset-1 amount" id="amount1" name="amount1" required autocomplete="Off"/>
+                    <input type="text" class="form-control col-2 offset-1 measure" id="measure1" name="measure1" list="measures" required autocomplete="Off">
+                    <datalist id="measures">
+                        {% for measure in measureList %}
+                        <option value="{{ measure['name'] }}">
+                        {% endfor %}
+                    </datalist>
+                    <div class="invalid-feedback">
+                        Please provide an ingredient name, measure and amount for all ingredients
+                    </div>
+                </div>
+            </fieldset>
+            <div class="row">
+                <button type="button" class="btn btn-secondary" id="add" value="Add Ingredient">Add Ingredient</button>
+                <button type="submit" class="btn btn-primary col-2 offset-10" id="submitRecipe">Add Recipe!</button>
+            </div>
+        </form>
+    </div>
+
+    <script type="text/javascript" src="/static/new.js"></script>
+    <script type="text/javascript" src="/static/jquery.ui.widget.js"></script>
+    <script type="text/javascript" src="/static/jquery.fileupload.js"></script>
+    <script type="text/javascript" src="/static/jquery.fileupload-ui.js"></script>
+    <script type="text/javascript" src="/static/jquery.fileupload-process.js"></script>
+    <script type="text/javascript" src="/static/jquery.fileupload-image.js"></script>
+
+{% endblock %}

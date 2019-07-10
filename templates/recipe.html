@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Recipe
+{% endblock %}
+
+{% block head %}
+<link href="/static/lightbox.css" rel="stylesheet">
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <div style="display: block;">
+        <br/>
+        <br/>
+        <h1 class="display-4">
+            {{ recipeInfo[0]['name'] }} <br/>
+        </h1>
+        <h1>
+            <small class="text-muted">Recipe By: {{ recipeInfo[0]['description'] }}</small>
+        </h1>
+        {% if recipeInfo[0].img_file_path %}
+        <a href="/static/images/{{ recipeInfo[0]['img_file_path'] }}" data-lightbox="{{ recipeInfo[0]['img_file_path'] }}" style="text-decoration: none;">
+          <img src="/static/images/{{ recipeInfo[0]['img_file_path'] }}" id="recipeImg" style="width: 140px; height: 140px;" class="img-thumbnail">
+        </a>
+        {% endif %}
+        <br/>
+        <br/>
+        <h4>Ingredient List</h4>
+        <table class="table">
+          <thead class="thead-light">
+            <tr>
+              <th scope="col">Ingredient</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Measure</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ingredient in ingredientList %}
+            <tr>
+              <td>{{ ingredient['ingredient'] }}</td>
+              <td>{{ ingredient['amount'] }}</td>
+              <td>{{ ingredient['measure'] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <br/>
+        <br/>
+        <h4>Recipe Instructions</h4>
+        <p>{{ recipeInfo[0]['instructions'] }}</p>
+        <br/>
+        <h6>
+            <small class="text-muted lead">Submitted By: {{ recipeInfo[0]['user_created'] }}</small>
+        </h6>
+        {% if session.username == recipeInfo[0]['user_created'] %}
+        <a href="/edit/{{ recipeInfo[0]['id'] }}">
+          <button type="button" class="btn btn-primary" id="edit">Edit Recipe</button>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<script type="text/javascript" src="/static/lightbox.js"></script>
+
+{% endblock %}

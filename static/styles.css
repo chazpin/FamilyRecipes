@@ -1,0 +1,97 @@
+nav .navbar-brand
+{
+    /* size for brand */
+    font-size: xx-large;
+}
+
+/* colors for brand */
+nav .navbar-brand .blue
+{
+    color: #537fbe;
+}
+nav .navbar-brand .red
+{
+    color: #ea433b;
+}
+nav .navbar-brand .yellow
+{
+    color: #f5b82e;
+}
+nav .navbar-brand .green
+{
+    color: #2e944b;
+}
+
+.loadingModal{
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba(255, 255, 255, .8)
+    url('/static/images/fileUpload/loading.gif')
+    50% 50%
+    no-repeat;
+}
+
+.loading .loadingModal {
+    overflow: hidden;
+    display: block;
+}
+
+.ingredientRow
+{
+    margin-top: 15px;
+}
+
+.labelRow
+{
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.addNewHeader
+{
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+.btn-update {
+    margin-top: 15px;
+    margin-left: auto;
+}
+
+.successHeader .ui-widget-header{
+    background: #5cb85c;
+}
+
+.failHeader .ui-widget-header{
+    background: #d9534f;
+}
+
+.ui-dialog-title{
+    text-align: center;
+}
