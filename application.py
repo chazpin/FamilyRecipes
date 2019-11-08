@@ -32,8 +32,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Mailjet account configuration
-api_key = '94c3d2170fef4a6e441de7e1db3af03d'
-api_secret = '03e0e888a1cd88e977a38a10c4fb1c23'
+# Removed api keys due to exposure on github.
 
 # Ensure responses aren't cached
 @app.after_request
