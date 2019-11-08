@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Account Activation
+{% endblock %}
+
+{% block head %}
+<link href="/static/landing.css" rel="stylesheet">
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-10 col-sm-6 col-lg-3">
+            <div id="loginForm" class="loginForm" style="text-align: center; display: none;">
+                <img src="static/images/appImages/android-chrome-192x192.png" class="avatar">
+                <h1 class="loginTitle loginTop">Family</h1>
+                <h1 class="loginTitle">Recipes</h1><br />
+                    <form action="/activation" method="post" class="needs-validation">
+                        <div class="form-group">
+                            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="User Name" type="text" required>
+                            <div class="invalid-feedback">
+                                Please provide a User Name.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input autocomplete="off" autofocus class="form-control" name="userEmail" placeholder="Email" type="text" required>
+                            <div class="invalid-feedback">
+                                Please provide a valid Email Address.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control" name="activationKey" placeholder="Activation Key" type="password" required>
+                            <div class="invalid-feedback">
+                                Please provide an Activation Key.
+                            </div>
+                            <label for="activationKey"><a href="#" onclick="resendKey()">Resend Activation Key?</a></label>
+                        </div>
+                        <button class="btn btn-primary btn-block btn-font" type="submit">Activate Account</button><br />
+                        <p>Don't have an account? <a href="/register">Register Now!</a></p>
+                    </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container" id="registerForm" style="text-align: center; display: block; padding: 75px;">
+    <button class="btn btn-primary btn-block btn-font" onclick="activationShow()">Manual Account Activation</button>
+</div>
+
+<script type="text/javascript" src="static/activation.js"></script>
+{% endblock %}
