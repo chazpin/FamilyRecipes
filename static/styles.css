@@ -1,25 +1,61 @@
+body {
+    background: url('images/appImages/loginBGcompress.jpg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    background-color: #6c757d;
+}
+
+/*https://www.freecodecamp.org/news/how-to-keep-your-footer-where-it-belongs-59c6aa05c59c/*/
+
+#page-container {
+    position: relative;
+    min-height: 100vh;
+}
+
+#content-wrapper {
+    padding-bottom: 4.5rem;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2.5rem;
+    background-color: #ddeebb;
+}
+
 nav .navbar-brand
 {
     /* size for brand */
     font-size: xx-large;
 }
+.border {
+    border-radius: 15px;
+}
 
-/* colors for brand */
-nav .navbar-brand .blue
-{
-    color: #537fbe;
+.row {
+    margin-right: 0px;
+    margin-left: 0px;
 }
-nav .navbar-brand .red
-{
-    color: #ea433b;
+
+.bg-light {
+    opacity: 0.9;
 }
-nav .navbar-brand .yellow
-{
-    color: #f5b82e;
+
+.customNav {
+    border-radius: 15px;
+    padding: 20px;
 }
-nav .navbar-brand .green
-{
-    color: #2e944b;
+
+.containerStyle {
+    margin-top: 3vh;
+    background-color: white;
+    opacity: 0.9;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 0px 10px 0px #000;
 }
 
 .loadingModal{
@@ -50,12 +86,6 @@ nav .navbar-brand .green
 {
     padding-left: 0;
     margin-bottom: 0;
-}
-
-.addNewHeader
-{
-    margin-left: -15px;
-    margin-right: -15px;
 }
 
 .btn-file {
@@ -94,4 +124,58 @@ nav .navbar-brand .green
 
 .ui-dialog-title{
     text-align: center;
+}
+
+.btn-primary {
+  color: #555555;
+  background-color: #ddeebb;
+  border-color: #d3e9a7;
+}
+.btn-primary:focus,
+.btn-primary.focus {
+  color: #555555;
+  background-color: #c9e492;
+  border-color: #a0cf41;
+}
+.btn-primary:hover {
+  color: #555555;
+  background-color: #c9e492;
+  border-color: #badd76;
+}
+.btn-primary:active,
+.btn-primary.active,
+.open > .dropdown-toggle.btn-primary {
+  color: #555555;
+  background-color: #c9e492;
+  background-image: none;
+  border-color: #badd76;
+}
+.btn-primary:active:hover,
+.btn-primary.active:hover,
+.open > .dropdown-toggle.btn-primary:hover,
+.btn-primary:active:focus,
+.btn-primary.active:focus,
+.open > .dropdown-toggle.btn-primary:focus,
+.btn-primary:active.focus,
+.btn-primary.active.focus,
+.open > .dropdown-toggle.btn-primary.focus {
+  color: #555555;
+  background-color: #badd76;
+  border-color: #a0cf41;
+}
+.btn-primary.disabled:hover,
+.btn-primary[disabled]:hover,
+fieldset[disabled] .btn-primary:hover,
+.btn-primary.disabled:focus,
+.btn-primary[disabled]:focus,
+fieldset[disabled] .btn-primary:focus,
+.btn-primary.disabled.focus,
+.btn-primary[disabled].focus,
+fieldset[disabled] .btn-primary.focus {
+  background-color: #ddeebb;
+  border-color: #d3e9a7;
+}
+.btn-primary .badge {
+  color: #ddeebb;
+  background-color: #555555;
 }

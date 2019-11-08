@@ -10,7 +10,7 @@
 
 {% block main %}
 <div class="container">
-    <div style="display: block;">
+    <div class="containerStyle" style="display: block;">
         <br/>
         <br/>
         <h1 class="display-4">
@@ -53,7 +53,7 @@
         <h6>
             <small class="text-muted lead">Submitted By: {{ recipeInfo[0]['user_created'] }}</small>
         </h6>
-        {% if session.username == recipeInfo[0]['user_created'] %}
+        {% if userName == recipeInfo[0]['user_created'] %}
         <a href="/edit/{{ recipeInfo[0]['id'] }}">
           <button type="button" class="btn btn-primary" id="edit">Edit Recipe</button>
         </a>

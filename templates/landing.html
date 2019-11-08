@@ -1,55 +1,81 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Register
+    Login/Register
+{% endblock %}
+
+{% block head %}
+<link href="/static/landing.css" rel="stylesheet">
 {% endblock %}
 
 {% block main %}
-<div class="container">
-    <div id="loginForm" style="display: none; text-align: center;">
-        <h3>Log in to the Pinnelli Family Cookbook!</h3><br>
-            <form action="/login" method="post">
-                <div class="form-group">
-                    <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
-                </div>
-                <div class="form-group">
-                    <input class="form-control" name="password" placeholder="Password" type="password">
-                </div>
-                <button class="btn btn-primary" type="submit">Log In</button>
-            </form>
-    </div>
-    <div id="registerForm" style="display:none; text-align: center;">
-        <h3>Register with Pinnelli Family Cookbook!</h3><br>
-            <form action="/register" method="post" class="needs-validation" novalidate>
-                <div class="form-group">
-                    <input autocomplete="off" autofocus class="form-control" id="userName" name="username" placeholder="Username" type="text" onchange="nameCheck(this.value);" required>
-                    <div class="invalid-feedback">
-                        Please provide a username.
-                    </div>
-                    <small id="nameTaken" class="form-text"></small>
-                </div>
-                <div class="form-group">
-                    <input class="form-control" id="password" name="password" placeholder="Password" type="password" onkeyup="check()" onchange="passCheck()" required>
-                    <small id="message1" class="form-text"></small>
-                    <div class="invalid-feedback">
-                        Please provide a password.
-                    </div>
-                </div>
-                <div class="form-group">
-                    <input class="form-control" id="confirmation" name="confirmation" placeholder="Confirm Password" type="password" onkeyup="check()" required>
-                    <small id="message2" class="form-text"></small>
-                    <div class="invalid-feedback">
-                        Please re-type your password.
-                    </div>
-                </div>
-                <button class="btn btn-primary" id="register" type="submit" onclick="return Validate()">Register</button>
-            </form>
-    </div>
-    <div style="margin-top: 40px; text-align: center;">
-        <button id="btnLogin" onclick="showLogin()">Login</button>
-        <button id="btnRegister" onclick="showRegister()">Register</button>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-10 col-sm-6 col-lg-3">
+            <div id="loginForm" class="loginForm" style="text-align: center;">
+                <img src="static/images/appImages/android-chrome-192x192.png" class="avatar">
+                <h1 class="loginTitle loginTop">Family</h1>
+                <h1 class="loginTitle">Recipes</h1><br />
+                    <form action="/login" method="post">
+                        <div class="form-group">
+                            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control" name="password" placeholder="Password" type="password">
+                            <label for="password"><a href="#" onclick="forgotPass()">Forgot Password?</a></label>
+                        </div>
+                        <button class="btn btn-primary btn-block btn-font" type="submit">Log In</button><br />
+                        <p>Don't have an account? <a href="#" onclick="registerShow()">Register Now!</a></p>
+                    </form>
+            </div>
+            <div id="registerForm" class="registerForm" style="display:none; text-align: center;">
+                <img src="static/images/appImages/android-chrome-192x192.png" class="avatar">
+                <h1 class="loginTitle loginTop">Family</h1>
+                <h1 class="loginTitle">Recipes</h1><br />
+                    <form action="/register" method="post" class="needs-validation" novalidate>
+                        <div class="form-group">
+                            <input autocomplete="off" autofocus class="form-control" id="email" name="email" placeholder="Email address" type="email" required>
+                            <div class="invalid-feedback">
+                                Please provide a valid email address.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input autocomplete="off" autofocus class="form-control" id="userName" name="username" placeholder="Username" type="text" onchange="nameCheck(this.value);" required>
+                            <div class="invalid-feedback">
+                                Please provide a username.
+                            </div>
+                            <small id="nameTaken" class="form-text"></small>
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control" id="password" name="password" placeholder="Password" type="password" onkeyup="check()" onchange="passCheck()" required>
+                            <small id="message1" class="form-text"></small>
+                            <div class="invalid-feedback">
+                                Please provide a password.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control" id="confirmation" name="confirmation" placeholder="Confirm Password" type="password" onkeyup="check()" required>
+                            <small id="message2" class="form-text"></small>
+                            <div class="invalid-feedback">
+                                Please re-type your password.
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-block btn-font" id="register" type="submit" onclick="return Validate()">Register</button><br />
+                        <p>Have an account? <a href="#" onclick="loginShow()">Sign in!</a></p>
+                    </form>
+            </div>
+            <!--<div style="margin-top: 40px; text-align: center;">
+                <button id="btnLogin" onclick="showLogin()">Login</button>
+                <button id="btnRegister" onclick="showRegister()">Register</button>
+            </div>-->
+        </div>
     </div>
 </div>
+<!--<a style="background-color:black;color:white;text-decoration:none;padding:4px 6px;font-family:-apple-system, BlinkMacSystemFont, &quot;San Francisco&quot;, &quot;Helvetica Neue&quot;, Helvetica, Ubuntu, Roboto, Noto, &quot;Segoe UI&quot;, Arial, sans-serif;font-size:12px;font-weight:bold;line-height:1.2;display:inline-block;border-radius:3px"
+href="https://unsplash.com/@toddquackenbush?utm_medium=referral&amp;utm_campaign=photographer-credit&amp;utm_content=creditBadge" target="_blank" rel="noopener noreferrer"
+title="Download free do whatever you want high-resolution photos from Todd Quackenbush"><span style="display:inline-block;padding:2px 3px"><svg xmlns="http://www.w3.org/2000/svg"
+style="height:12px;width:auto;position:relative;vertical-align:middle;top:-2px;fill:white" viewBox="0 0 32 32"><title>unsplash-logo</title>
+<path d="M10 9V0h12v9H10zm12 5h10v18H0V14h10v9h12v-9z"></path></svg></span><span style="display:inline-block;padding:2px 3px">Todd Quackenbush</span></a>-->
 
 <script type="text/javascript" src="static/landing.js"></script>
 {% endblock %}

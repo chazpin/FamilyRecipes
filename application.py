@@ -1,10 +1,14 @@
 # Upload project to Heroku for free app hosting
 # https://cs50.readthedocs.io/heroku/
+# Project Submission Instructions here -- https://docs.cs50.net/2019/x/project/project.html
 import os
 import json
+import secrets
+import string
+import smtplib
 
 from cs50 import SQL
-from flask import Flask, flash, jsonify, redirect, render_template, request, session
+from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
@@ -13,6 +17,7 @@ from werkzeug.utils import secure_filename
 from collections import defaultdict
 import datetime
 from datetime import datetime
+from mailjet_rest import Client
 
 from helpers import login_required, apology, allowed_file
 
@@ -25,6 +30,10 @@ app = Flask(__name__)
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Mailjet account configuration
+api_key = '94c3d2170fef4a6e441de7e1db3af03d'
+api_secret = '03e0e888a1cd88e977a38a10c4fb1c23'
 
 # Ensure responses aren't cached
 @app.after_request
@@ -45,9 +54,13 @@ Session(app)
 db = SQL("sqlite:///recipe.db")
 db.execute("PRAGMA foreign_keys = ON")
 
+# Configure Email Address
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     specList = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")"]
+    userName = request.form.get("username")
+    userEmail = request.form.get("email")
 
     """Register user"""
     # direct user to register page
@@ -86,23 +99,126 @@ def register():
             flash("Sorry, " + "'" + request.form.get("username") + "'" + " is taken.", 'danger')
             # return redirect("register")
             return apology("Username taken", 400)
-        # Username is available. Save username and hashed password in database
+        # Username is available. Save username and hashed password in database. Send email message with code for user to enter on activation page
         else:
-            db.execute("INSERT INTO users (username, hash) VALUES (:username, :hashed)", username=request.form.get(
-                "username"), hashed=generate_password_hash(request.form.get("password"), method="pbkdf2:sha256", salt_length=8))
+            # https://docs.python.org/3/library/secrets.html
+            alphabet = string.ascii_letters + string.digits
+            while True:
+                newKey = ''.join(secrets.choice(alphabet) for i in range(10))
+                if (any(c.islower() for c in newKey)
+                        and any(c.isupper() for c in newKey)
+                        and sum(c.isdigit() for c in newKey) >= 3):
+                    break
 
-            # Need to set the session to satisfy @loginrequired decorator
-            userid = db.execute("SELECT id FROM users WHERE username = :username", username=request.form.get("username"))
-            session["user_id"] = userid[0]['id']
+            db.execute("INSERT INTO users (username, hash, email, activation_key) VALUES (:username, :hashed, :email, :activationKey)", username=request.form.get(
+                "username"), hashed=generate_password_hash(request.form.get("password"), method="pbkdf2:sha256", salt_length=8), email=userEmail, activationKey=newKey)
 
-            # Redirect user to home page and flash login success message
-            flash('You were successfully registered. Once your account has been approved you will be able to login!', 'success')
-            return redirect("/")
+            # Send email to new user with link to activation page and key via MailJet
+            # https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xi-email-support
+            mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+            data = {
+              'Messages': [
+                {
+                  "From": {
+                    "Email": "FamilyRecipesRobot@gmail.com",
+                    "Name": "Frank the Family Recpies Robot"
+                  },
+                  "To": [
+                    {
+                      "Email": userEmail
+                    }
+                  ],
+                  "Subject": "Family Recipes Account Activation",
+                  "TextPart": "Welcome to the Famnily Recpies App!",
+                  "HTMLPart": "<h3>Dear " + userName + ", welcome to the Family Recipes App!</h3><br />There's just one more quick step." +
+                  " Click on the link below to confirm your email address. Then you can begin using the Family Recipes App!<br /><br />" +
+                  request.url_root[:-1] + # Remove the trailing / from the root url. A leading / is applied from the url_for method
+                  url_for('activation', name=userName, email=userEmail, key=newKey) +
+                  " We're so happy you're here!<br /> --Frank & The Family Recipes Team",
+                  "CustomID": "AppGettingStartedTest"
+                }
+              ]
+            }
+            result = mailjet.send.create(data=data)
+            print (result.status_code)
+            print (result.json())
+
+            # Redirect user to activation page and flash login success message
+            flash("Hooray, you were successfully registered! We've sent a message to the email address you provided that contains a link to confirm your account registration. " +
+                    "Follow the link in the email to begin using Family Recipes or click below to enter the key manually.", 'success')
+            return render_template("activation.html")
 
     # handle new user registration submission
     else:
         return render_template("landing.html")
 
+@app.route("/activation", methods=["GET", "POST"])
+def activation():
+
+    # Activate the user's newly registered account via the email link via GET
+    if request.method == "GET":
+        # Get user information from url
+        name = request.args.get("name")
+        email = request.args.get("email")
+        key = request.args.get("key")
+
+        if not name or not email or not key:
+            flash('Oops! There was something wrong with the URL entered. Try entering your information manually in the fields below.', 'danger')
+            return render_template("activation.html")
+        else:
+            # Get account info to check the email account is not currently activated and key matches
+            accountInfo = db.execute("SELECT * FROM users WHERE email = :email AND username = :username",
+                email=email, username=name)
+
+            if len(accountInfo) != 1:
+                return apology("We can't find your account information in our database. Check your User Name and Email and try again.", 400)
+            if accountInfo[0]["activation_key"] != key:
+                return apology("Your account is already active or the activation key provided does not match the one provided to you at registration.", 400)
+            if accountInfo[0]["active"] != 0: # Account is already active
+                flash ('Your account has already been activated!', 'success')
+                session["user_id"] = accountInfo[0]["id"] # Make sure to log user in!
+                return redirect("/")
+
+            # Mark users account as active
+            db.execute("UPDATE users SET active = 1 WHERE id = :userid", userid=accountInfo[0]["id"])
+
+            # Remember which user has logged in
+            session["user_id"] = accountInfo[0]["id"]
+
+            # Redirect user to home page and flash login success message
+            ################################ TODO? Add 'time of day' message. ##################################
+            flash('Welcome ' + name + '!', 'success')
+            return redirect("/")
+    else:     # Manual activation of the user's newly registered account via POST
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            return apology("You must provide the user name you registered with", 400)
+        # Ensure email was submitted
+        if not request.form.get("userEmail"):
+            return apology("You must provide the email address you registered with", 400)
+        # Ensure activation key was submitted
+        if not request.form.get("activationKey"):
+            return apology("You must provide the activation key provided to you at account registration", 400)
+        # Get account info to check that the email account is not currently activated and key matches
+        accountInfo = db.execute("SELECT * FROM users WHERE email = :email AND username = :username",
+            email=request.form.get("userEmail"), username=request.form.get("username"))
+
+        if len(accountInfo) != 1:
+            return apology("We can't find your account information in our database. Check your User Name and Email and try again.", 400)
+        if accountInfo[0]["active"] != 0 or accountInfo[0]["activation_key"] != request.form.get("activationKey"):
+            return apology("Your account is already active or the activation key provided does not match the one provided to you at registration.", 400)
+
+        # Mark users account as active
+        db.execute("UPDATE users SET active = 1 WHERE id = :userid", userid=accountInfo[0]["id"])
+
+        # Remember which userid AND username has logged in
+        session["user_id"] = accountInfo[0]["id"]
+        session["userName"] = accountInfo[0]["username"]
+
+        # Redirect user to home page and flash login success message
+        ################################ TODO? Add 'time of day' message. ##################################
+        flash('Welcome ' + request.form.get("username") + '!', 'success')
+        return redirect("/")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -136,10 +252,12 @@ def login():
 
         # Need to check if the user account is active -- active = 1, inactive = 0
         if rows[0]["active"] == 0:
-            return apology("Sorry, your account has not been activated. An email has been sent to CAP for activation!")
+            flash("Oops! Your account hasn't been activated yet. You will recieve an email at the address provided when the account review process has completed.", "danger")
+            return render_template("activation.html")
 
-        # Remember which user has logged in
+        # Remember which userid AND username has logged in
         session["user_id"] = rows[0]["id"]
+        session["userName"] = rows[0]["username"]
 
         # Redirect user to home page and flash login success message
         ################################ TODO? Add 'time of day' message. ##################################
@@ -163,10 +281,10 @@ def logout():
 
 
 @app.route("/", methods=["GET"])
-#login_required
+@login_required
 def dashboard():
     # Bypass to show the navbar without logging in
-    session.user_id = 1;
+    # session.user_id = 1;
 
     # Get the last 5 recipes added
     lastFive = db.execute("SELECT * FROM recipe ORDER BY date_created desc LIMIT 5")
@@ -182,15 +300,15 @@ def dashboard():
 
     # Get ALL of the current user's recipes
     myRecipes = db.execute("SELECT * FROM recipe WHERE user_created = (SELECT username FROM \
-                            users WHERE id = :ID)", ID = session.user_id)
+                            users WHERE id = :ID)", ID = session.get('user_id'))
 
     return render_template("dashboard.html", lastFive=lastFive, myRecipes=myRecipes)
 
 @app.route("/search", methods=["GET", "POST"])
-#@login_required
+@login_required
 def search():
     # Bypass to show navbar without logging in
-    session.user_id = 1;
+    # session.user_id = 1;
 
     if request.method == "POST":
         if not request.form.get("searchType"):
@@ -242,19 +360,21 @@ def search():
     return render_template("search.html")
 
 @app.route("/cookbook")
-#@login_required
+@login_required
 def mandy():
-    session.user_id = 1;
+    #session.user_id = 1;
     return render_template("cookbook.html")
 
 # A recipe id is specified in this route since data from a recipe is required to fill the page
 @app.route("/recipe/<int:recipe_id>", methods=["GET", "POST"])
-#@login_required
+@login_required
 def recipe(recipe_id):
 
     # Bypass to show the navbar without logging in
-    session.user_id = 1;
-    session.username = "chazpin";
+    #session.user_id = 1;
+    #session.username = "chazpin";
+    userName = session.get('userName')
+    print(userName)
 
     # Use id to query recipe and recipe ingredient table for data to load onto page
     recipeInfo = db.execute("SELECT * FROM recipe where id = :ID", ID = recipe_id)
@@ -265,14 +385,14 @@ def recipe(recipe_id):
                                 on i.id = ri.ingredient_id LEFT OUTER JOIN measure mu on mu.id = measure_id \
                                 WHERE r.id = :ID", ID = recipe_id)
 
-    return render_template("recipe.html", session=session, recipeInfo=recipeInfo, ingredientList=ingredientList)
+    return render_template("recipe.html", userName=userName, recipeInfo=recipeInfo, ingredientList=ingredientList)
 
 @app.route("/edit/<int:recipe_id>", methods=["GET", "POST"])
-#@login_required
+@login_required
 def edit(recipe_id):
 
     #Bypass to show the navbar without logging in
-    session.user_id = 1
+    #session.user_id = 1
 
     if request.method == "GET":
 
@@ -322,10 +442,10 @@ def edit(recipe_id):
             return redirect("/edit/" + recipeID)
 
 @app.route("/new", methods=["GET", "POST"])
-#@login_required
+@login_required
 def new():
     # Bypass to show the navbar without logging in
-    session.user_id = 1;
+    # session.user_id = 1;
 
     """Validate a new recipe"""
     if request.method == "POST":
@@ -341,9 +461,11 @@ def new():
         elif not request.form.get("ingredient1"):
             return apology("You must provide at least one ingredient for your recipe", 400)
         print(request.form.get("numIngredients"))
+
+        userID = session.get('user_id')
         # Query database for username
         username = db.execute("SELECT username FROM users WHERE id = :user_id",
-                          user_id=session.user_id)
+                          user_id=userID)
 
         # Check for image upload path before saving to db
         if request.form.get('filePath') is None:
@@ -432,7 +554,7 @@ def new():
             key=recipeKey[0]["MAX(id)"], ingredient=ingredientIDs[i - 1], measure=measureIDs[i - 1],amount=request.form.get("amount" + str(i)))
             i += 1
 
-        # Direct the user to the new recipe page
+        flash("You've successfully added your recipe! It will now appear in your list of recipes below and be searchable to other users.", 'success')
         return redirect("/")
 
     else:

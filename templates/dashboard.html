@@ -6,52 +6,52 @@
 
 {% block main %}
 <div class="container">
-    <div style="display: block;">
-        <br/>
-        <br/>
-        <h1 class="display-4">Recently Added Recipes</h1>
-        <br/>
-        <table class="table">
-          <thead class="thead-light">
-            <tr>
-              <th scope="col">Recipe Name</th>
-              <th scope="col">Author</th>
-              <th scope="col">Added By</th>
-              <th scope="col">Date Added</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for recipe in lastFive %}
-            <tr>
-              <td><a href="/recipe/{{ recipe['id'] }}">{{ recipe['name'] }}</a></td>
-              <td>{{ recipe['description'] }}</td>
-              <td>{{ recipe['user_created'] }}</td>
-              <td>{{ recipe['date_created'] }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        <br/>
-        <h1 class="display-4">My Recipes</h1>
-        <br/>
-        <table class="table">
-          <thead class="thead-light">
-            <tr>
-              <th scope="col">Recipe Name</th>
-              <th scope="col">Author</th>
-              <th scope="col">Date Added</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for recipe in myRecipes %}
-            <tr>
-              <td><a href="/recipe/{{ recipe['id'] }}">{{ recipe['name'] }}</a></td>
-              <td>{{ recipe['description'] }}</td>
-              <td>{{ recipe['date_created'] }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-    </div>
+  <div class="containerStyle" style="display: block;">
+      <br/>
+      <br/>
+      <h1 class="display-4">Recently Added Recipes</h1>
+      <br/>
+      <table class="table">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Recipe Name</th>
+            <th scope="col">Author</th>
+            <th scope="col">Added By</th>
+            <th scope="col">Date Added</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for recipe in lastFive %}
+          <tr>
+            <td><a href="/recipe/{{ recipe['id'] }}">{{ recipe['name'] }}</a></td>
+            <td>{{ recipe['description'] }}</td>
+            <td>{{ recipe['user_created'] }}</td>
+            <td>{{ recipe['date_created'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <br/>
+      <h1 class="display-4">My Recipes</h1>
+      <br/>
+      <table class="table">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Recipe Name</th>
+            <th scope="col">Author</th>
+            <th scope="col">Date Added</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for recipe in myRecipes %}
+          <tr>
+            <td><a href="/recipe/{{ recipe['id'] }}">{{ recipe['name'] }}</a></td>
+            <td>{{ recipe['description'] }}</td>
+            <td>{{ recipe['date_created'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  </div>
 </div>
 {% endblock %}

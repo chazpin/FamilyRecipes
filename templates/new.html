@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block main %}
-    <div class="container">
+    <div class="container containerStyle">
         <br/>
         <br/>
         <h1 class="display-4 addNewHeader">Add a new recipe to the Pinnelli Cookbook!</h1>
@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="txtPost">Photos</label>
+                <label for="txtPost">Photo</label>
                 <div class="input-group" style="display: inline-block">
                     <img id="imgUpload" style="width: 140px; height: 140px;" class="img-thumbnail">
                     <input type="hidden" name="filePath" id="filePath"></input>
@@ -67,9 +67,11 @@
                     </div>
                 </div>
             </fieldset>
-            <div class="row">
+            <div class="form-group row">
                 <button type="button" class="btn btn-secondary" id="add" value="Add Ingredient">Add Ingredient</button>
-                <button type="submit" class="btn btn-primary col-2 offset-10" id="submitRecipe">Add Recipe!</button>
+            </div>
+            <div class="form-group row">
+                <button type="submit" class="btn btn-primary btn-block" id="submitRecipe">Add Recipe!</button>
             </div>
         </form>
     </div>

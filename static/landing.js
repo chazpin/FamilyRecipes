@@ -1,46 +1,19 @@
-function showLogin(){
-    var login = document.getElementById("loginForm");
-    var btnLogin = document.getElementById("btnLogin");
-    var register = document.getElementById("registerForm");
-    var btnRegister = document.getElementById("btnRegister");
-    if (login.style.display === "none") {
-        login.style.display = "block";
-        btnLogin.style.display = "none";
-    } else {
-        login.style.display = "none";
-    }
-
-    if (register.style.display === "block") {
-        register.style.display = "none";
-        btnRegister.style.display = "inline-block";
-        btnRegister.style.textAlign = "center";
-    }
-    else {
-        register.style.display = "none";
-    }
+function registerShow(){
+    $('#loginForm').hide();
+    $('#registerForm').show();
 }
 
-function showRegister(){
-    var login = document.getElementById("loginForm");
-    var btnLogin = document.getElementById("btnLogin");
-    var register = document.getElementById("registerForm");
-    var btnRegister = document.getElementById("btnRegister");
-    if (register.style.display === "none") {
-        register.style.display = "block";
-        btnRegister.style.display = "none";
-    } else {
-        register.style.display = "none";
-    }
-    // Hide the login form and show the button
-    // Only want user to see one form at a time
-    if (login.style.display === "block") {
-        login.style.display = "none";
-        btnLogin.style.display = "inline-block";
-        btnLogin.style.textAlign = "center";
-    }
-    else {
-        login.style.display = "none";
-    }
+function loginShow(){
+    $('#registerForm').hide();
+    $('#loginForm').show();
+}
+
+function forgotPass(){
+    alert("Whoops! This functionality doesn't exist yet. Don't forget your password!");
+}
+
+function resendKey(){
+    alert("Whoops! This functionality doesn't exist yet. Don't lose your activation key!");
 }
 
 // Example starter JavaScript for disabling form submissions if there are invalid fields
