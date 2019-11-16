@@ -6,7 +6,9 @@ import json
 import secrets
 import string
 import smtplib
+import logging
 
+from logging import handlers
 from cs50 import SQL
 from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_session import Session
@@ -31,8 +33,19 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Set up error logging in a text file
+handler = logging.handlers.RotatingFileHandler(
+        'errorLog.txt',
+        maxBytes=1024 * 1024)
+app.logger.setLevel(logging.WARNING)
+formatter = logging.Formatter('%(asctime)s - %(name)s -%(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+app.logger.addHandler(handler)
+
 # Mailjet account configuration
 # Removed api keys due to exposure on github.
+# Configure Email Address
+
 
 # Ensure responses aren't cached
 @app.after_request
@@ -52,8 +65,6 @@ Session(app)
 # Recipe Data Model - https://gist.github.com/greghelton/1546514
 db = SQL("sqlite:///recipe.db")
 db.execute("PRAGMA foreign_keys = ON")
-
-# Configure Email Address
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -238,7 +249,7 @@ def login():
             return apology("must provide password", 403)
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username",
+        rows = db.execute("ELECT * FROM users WHERE username = :username",
                           username=request.form.get("username"))
 
         # Ensure username exists and password is correct
@@ -749,6 +760,30 @@ def errorhandler(e):
     """Handle error"""
     if not isinstance(e, HTTPException):
         e = InternalServerError()
+
+    # Send error email
+    mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+    data = {
+      'Messages': [
+        {
+          "From": {
+            "Email": "FamilyRecipesRobot@gmail.com",
+            "Name": "Frank the Family Recpies Robot"
+          },
+          "To": [
+            {
+              "Email": "FamilyRecipesRobot@gmail.com"
+            }
+          ],
+          "Subject": "Family Recipes Application Error",
+          "TextPart": e.name + "\n" + e.description + "\n" + "Check errorLog.txt for more detailed error information."
+        }
+      ]
+    }
+    result = mailjet.send.create(data=data)
+    print (result.status_code)
+    print (result.json())
+
     return apology(e.name, e.code)
 
 
