@@ -61,9 +61,11 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Configure CS50 Library to use SQLite database
+# Configure CS50 Library to use SQLite database - sqlite:///recipe.db
 # Recipe Data Model - https://gist.github.com/greghelton/1546514
-db = SQL("sqlite:///recipe.db")
+# Heroku Postgres DB URI - postgres://znwdhsfsbuxakm:bc9956eab1fa67f741ba5cd224abb80282becedd505225e507431e2af0a13766@ec2-174-129-253-174.compute-1.amazonaws.com:5432/dadjei19arlitl
+# Browse/edit Postgres db at adminer.cs50.net
+db = SQL("postgres://znwdhsfsbuxakm:bc9956eab1fa67f741ba5cd224abb80282becedd505225e507431e2af0a13766@ec2-174-129-253-174.compute-1.amazonaws.com:5432/dadjei19arlitl")
 db.execute("PRAGMA foreign_keys = ON")
 
 @app.route("/register", methods=["GET", "POST"])
