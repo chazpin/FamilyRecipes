@@ -7,6 +7,7 @@ import secrets
 import string
 import smtplib
 import logging
+import psycopg2
 
 from logging import handlers
 from cs50 import SQL
