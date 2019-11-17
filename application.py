@@ -294,7 +294,7 @@ def logout():
     return redirect("/login")
 
 
-@app.route("~/", methods=["GET"])
+@app.route("/", methods=["GET"])
 @login_required
 def dashboard():
     # Bypass to show the navbar without logging in
