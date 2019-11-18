@@ -46,7 +46,8 @@ app.logger.addHandler(handler)
 # Mailjet account configuration
 # Removed api keys due to exposure on github.
 # Configure Email Address
-
+api_key = os.environ.get('MAILJET_KEY')
+api_secret = os.environ.get('MAILJET_SECRET')
 
 # Ensure responses aren't cached
 @app.after_request
@@ -64,9 +65,9 @@ Session(app)
 
 # Configure CS50 Library to use SQLite database - sqlite:///recipe.db
 # Recipe Data Model - https://gist.github.com/greghelton/1546514
-# Heroku Postgres DB URI - postgres://znwdhsfsbuxakm:bc9956eab1fa67f741ba5cd224abb80282becedd505225e507431e2af0a13766@ec2-174-129-253-174.compute-1.amazonaws.com:5432/dadjei19arlitl
+# Heroku Postgres DB URI in config var
 # Browse/edit Postgres db at adminer.cs50.net
-db = SQL("postgres://znwdhsfsbuxakm:bc9956eab1fa67f741ba5cd224abb80282becedd505225e507431e2af0a13766@ec2-174-129-253-174.compute-1.amazonaws.com:5432/dadjei19arlitl")
+db = SQL(os.environ.get('DATABASE_URL'))
 # Only need to enable foreign key functionality in a sqlite db
 # db.execute("PRAGMA foreign_keys = ON")
 
