@@ -306,10 +306,10 @@ def dashboard():
 
     # User friendly date conversion
     for date in lastFive:
-        # Take date string an convert to a datetime object
-        oldStr = datetime.strptime(date['date_created'], '%Y-%m-%d %H:%M:%S')
+        # Take date string an convert to a datetime object -- 11/18/19 returned date is already a datetime object, not a string
+        # oldStr = datetime.strptime(date['date_created'], '%Y-%m-%d %H:%M:%S')
         # Convert new datetime object to string with the desired format
-        newDate = datetime.strftime(oldStr, '%d-%b-%Y  %I:%M:%S %p')
+        newDate = datetime.strftime(date['date_created'], '%d-%b-%Y  %I:%M:%S %p')
         # Pass the new datetime back into the list
         date['date_created'] = newDate
 
