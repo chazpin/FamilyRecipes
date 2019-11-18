@@ -254,7 +254,7 @@ def login():
             return apology("must provide password", 403)
 
         # Query database for username
-        rows = db.execute("ELECT * FROM users WHERE username = :username",
+        rows = db.execute("SELECT * FROM users WHERE username = :username",
                           username=request.form.get("username"))
 
         # Ensure username exists and password is correct
