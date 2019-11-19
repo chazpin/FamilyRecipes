@@ -316,7 +316,11 @@ def dashboard():
     # Get ALL of the current user's recipes
     myRecipes = db.execute("SELECT * FROM recipe WHERE user_created = (SELECT username FROM \
                             users WHERE id = :ID)", ID = session.get('user_id'))
-
+    # User friendly date conversion
+    for dateCreated in myRecipes:
+        newDateCreated = datetime.strftime(dateCreated['date_created'], '%d-%b-%Y %I:%M:%S %p')
+        dateCreated['date_created'] = newDateCreated
+        
     return render_template("dashboard.html", lastFive=lastFive, myRecipes=myRecipes)
 
 @app.route("/search", methods=["GET", "POST"])
