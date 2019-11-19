@@ -538,7 +538,7 @@ def new():
 
         # Now save FIRST ingredient, measure, and amount to the recipe_ingredients table using the ingredient and measure primary keys
         db.execute("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, measure_id, amount) VALUES (:key, :ingredient, :measure, :amount)",
-        key=recipeKey[0]["MAX(id)"], ingredient=ingredientIDs[0], measure=measureIDs[0], amount=request.form.get("amount1"))
+        key=recipeKey[0]["max"], ingredient=ingredientIDs[0], measure=measureIDs[0], amount=request.form.get("amount1"))
 
         while ingredients >= i:
             # Check if ingredient and measure already exist in the DB
