@@ -58,14 +58,14 @@ def after_request(response):
     return response
 
 # Configure session to use filesystem (instead of signed cookies)
-app.config["SESSION_FILE_DIR"] = mkdtemp()
+# app.config["SESSION_FILE_DIR"] = mkdtemp() -- Removing due to herokus ephermeral file system
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Configure CS50 Library to use SQLite database - sqlite:///recipe.db
+# Configure CS50 Library to use SQLite database - "sqlite:///recipe.db"
 # Recipe Data Model - https://gist.github.com/greghelton/1546514
-# Heroku Postgres DB URI in config var
+# Heroku Postgres DB URI in config var -- os.environ.get('DATABASE_URL')
 # Browse/edit Postgres db at adminer.cs50.net
 db = SQL(os.environ.get('DATABASE_URL'))
 # Only need to enable foreign key functionality in a sqlite db
@@ -320,7 +320,7 @@ def dashboard():
     for dateCreated in myRecipes:
         newDateCreated = datetime.strftime(dateCreated['date_created'], '%d-%b-%Y %I:%M:%S %p')
         dateCreated['date_created'] = newDateCreated
-        
+
     return render_template("dashboard.html", lastFive=lastFive, myRecipes=myRecipes)
 
 @app.route("/search", methods=["GET", "POST"])
