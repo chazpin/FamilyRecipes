@@ -8,6 +8,7 @@ import string
 import smtplib
 import logging
 import psycopg2
+import boto3
 
 from logging import handlers
 from cs50 import SQL
@@ -48,6 +49,10 @@ app.logger.addHandler(handler)
 # Configure Email Address
 api_key = os.environ.get('MAILJET_KEY')
 api_secret = os.environ.get('MAILJET_SECRET')
+
+# AWS S3 Configuration
+s3_key = os.environ.get("AWS_ACCESS_KEY_ID")
+s3_secret = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
 # Ensure responses aren't cached
 @app.after_request
@@ -610,20 +615,43 @@ def autocomplete():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
-    if request.method == 'POST':
-        file = request.files['file']
-        if file.filename == '':
+    # Set required environment variables
+    S3_BUCKET = os.environ.get("S3_BUCKET_NAME")
+
+    if request.method == 'GET':
+        file_name = request.args.get('file_name')
+        file_type = request.args.get('file_type')
+        if file_name == '' or not file_name:
             flash('No selected file')
             return redirect(request.url)
-        if file and allowed_file(file.filename):
+        if file_name and allowed_file(file_name):
             # Find last char of file name before file extension
-            index = file.filename.rfind('.')
+            # index = file.filename.rfind('.')
             # Add datetime info to file name to avoid duplicate file uploads
-            file.filename = file.filename[:index] + datetime.now().strftime("%m%d%y%I%M%S") + file.filename[index:]
+            file_name = file_name + datetime.now().strftime("%m%d%y%I%M%S") + file_type
 
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    return json.dumps({'filename':filename})
+            filename = secure_filename(file_name)
+            # Not saving locally
+            # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+            s3 = boto3.client('s3')
+
+            presigned_post = s3.generate_presigned_post(
+                Bucket = S3_BUCKET,
+                Key = filename,
+                Fields = {"acl": "public-read", "Content-Type": file_type},
+                Conditions = [
+                    {"acl": "public-read"},
+                    {"Content-Type": file_type}
+                ],
+                ExpiresIn = 3600
+            )
+
+    return json.dumps({
+        #'filename':filename
+        'data': presigned_post,
+        'url': 'https://%s.s3amazonaws.com/%s' % (S3_BUCKET, filename)
+    })
 
 @app.route("/edit/uploadEdit/<int:recipe_id>", methods=['POST'])
 def uploadEdit(recipe_id):

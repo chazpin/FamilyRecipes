@@ -39,16 +39,17 @@ $(document).ready(function() {
 
 $(function() {
     $('#fileupload').fileupload({
-        url: 'upload',
+        url: 'upload?file_name=' + data.files[0].name + '&file_type=' + data.files[0].type,
         dataType: 'json',
+        type: 'GET',
         add: function(e, data) {
-            data.submit();
+            data.submit(); // GET request to the upload method which will get signed AWS request -- Needs to return json dumps
         },
-        success: function(response, status) {
+        success: function(response, status) { // Add the uploadFile example here
             console.log(response.filename);
-              var filePath = './static/images/' + response.filename;
-              $('#imgUpload').attr('src',filePath);
-              $('#filePath').val(filePath);
+            uploadFile(data.files[0], response.data, response.url);
+
+              // var filePath = './static/images/' + response.filename;  Local Only
               console.log('success');
         },
         error: function(error) {
@@ -56,6 +57,30 @@ $(function() {
         }
     });
 });
+
+function uploadFile(file, s3Data, url){
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", s3Data.url);
+
+  var postData = new FormData();
+  for(key in s3Data.fields){
+    postData.append(key, s3Data.fields[key]);
+  }
+  postData.append('file', file);
+
+  xhr.onreadystatechange = function() {
+    if(xhr.readyState === 4){
+      if(xhr.status === 200 || xhr.status === 204){
+        $('#imgUpload').attr('src',response.url);
+        $('#filePath').val(response.url);
+      }
+      else{
+        alert("Could not upload file.");
+      }
+   }
+  };
+  xhr.send(postData);
+}
 
 // Example starter JavaScript for disabling form submissions if there are invalid fields
 (function() {
