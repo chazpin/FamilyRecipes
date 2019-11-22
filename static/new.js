@@ -38,8 +38,9 @@ $(document).ready(function() {
 });
 
 $(function() {
+    var file = $('#filePath').prop('files');
     $('#fileupload').fileupload({
-        url: 'upload?file_name=' + data.files[0].name + '&file_type=' + data.files[0].type,
+        url: 'upload?file_name=' + file.name + '&file_type=' + file.type,
         dataType: 'json',
         type: 'GET',
         add: function(e, data) {
