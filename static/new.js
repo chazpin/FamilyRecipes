@@ -37,12 +37,8 @@ $(document).ready(function() {
     });
 });
 
-$('#filePath').change(function() {
-  initUpload();
-});
-
-function initUpload() {
-    var file = $('#filePath').prop('files')[0];
+$(function() {
+    var file = $('#fileupload').prop('files')[0];
     $('#fileupload').fileupload({
         url: 'upload?file_name=' + file.name + '&file_type=' + file.type,
         dataType: 'json',
@@ -61,7 +57,7 @@ function initUpload() {
             console.log(error);
         }
     });
-};
+});
 
 function uploadFile(file, s3Data, url){
   var xhr = new XMLHttpRequest();
