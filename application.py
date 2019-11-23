@@ -47,8 +47,9 @@ app.logger.addHandler(handler)
 # Mailjet account configuration
 # Removed api keys due to exposure on github.
 # Configure Email Address
-api_key = os.environ.get('MAILJET_KEY')
-api_secret = os.environ.get('MAILJET_SECRET')
+if (os.environ['FLASK_ENV'] == 'production'):
+    api_key = os.environ.get('MAILJET_KEY')
+    api_secret = os.environ.get('MAILJET_SECRET')
 
 # AWS S3 Configuration
 s3_key = os.environ.get("AWS_ACCESS_KEY_ID")
@@ -72,9 +73,13 @@ Session(app)
 # Recipe Data Model - https://gist.github.com/greghelton/1546514
 # Heroku Postgres DB URI in config var -- os.environ.get('DATABASE_URL')
 # Browse/edit Postgres db at adminer.cs50.net
-db = SQL(os.environ.get('DATABASE_URL'))
 # Only need to enable foreign key functionality in a sqlite db
-# db.execute("PRAGMA foreign_keys = ON")
+if (os.environ['FLASK_ENV'] == 'production'):
+    db = SQL(os.environ.get('DATABASE_URL'))
+else:
+    db = SQL("sqlite:///recipe.db")
+    db.execute("PRAGMA foreign_keys = ON")
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -310,21 +315,25 @@ def dashboard():
     lastFive = db.execute("SELECT * FROM recipe ORDER BY date_created desc LIMIT 5")
 
     # User friendly date conversion
-    for date in lastFive:
-        # Take date string an convert to a datetime object -- 11/18/19 returned date is already a datetime object, not a string
-        # oldStr = datetime.strptime(date['date_created'], '%Y-%m-%d %H:%M:%S')
-        # Convert new datetime object to string with the desired format
-        newDate = datetime.strftime(date['date_created'], '%d-%b-%Y  %I:%M:%S %p')
-        # Pass the new datetime back into the list
-        date['date_created'] = newDate
+    # Postgres and SQLite db strp/ftime differences
+    if (os.environ['FLASK_ENV'] == 'production'):
+        for date in lastFive:
+            # Take date string an convert to a datetime object -- 11/18/19 returned date is already a datetime object, not a string
+            # oldStr = datetime.strptime(date['date_created'], '%Y-%m-%d %H:%M:%S')
+            # Convert new datetime object to string with the desired format
+            newDate = datetime.strftime(date['date_created'], '%d-%b-%Y  %I:%M:%S %p')
+            # Pass the new datetime back into the list
+            date['date_created'] = newDate
 
     # Get ALL of the current user's recipes
     myRecipes = db.execute("SELECT * FROM recipe WHERE user_created = (SELECT username FROM \
                             users WHERE id = :ID)", ID = session.get('user_id'))
-    # User friendly date conversion
-    for dateCreated in myRecipes:
-        newDateCreated = datetime.strftime(dateCreated['date_created'], '%d-%b-%Y %I:%M:%S %p')
-        dateCreated['date_created'] = newDateCreated
+
+    if (os.environ['FLASK_ENV'] == 'production'):
+        # User friendly date conversion
+        for dateCreated in myRecipes:
+            newDateCreated = datetime.strftime(dateCreated['date_created'], '%d-%b-%Y %I:%M:%S %p')
+            dateCreated['date_created'] = newDateCreated
 
     return render_template("dashboard.html", lastFive=lastFive, myRecipes=myRecipes)
 
@@ -613,24 +622,26 @@ def autocomplete():
         results.append(query[0]['name'])
     return jsonify(matching_results=results)
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['POST'])
 def upload():
     # Set required environment variables
     S3_BUCKET = os.environ.get("S3_BUCKET_NAME")
 
-    if request.method == 'GET':
-        file_name = request.args.get('file_name')
-        file_type = request.args.get('file_type')
-        if file_name == '' or not file_name:
+    if request.method == 'POST':
+        #file_name = request.args.get('file_name')
+        #file_type = request.args.get('file_type')
+        file = request.files['file']
+        if file == '' or not file:
             flash('No selected file')
             return redirect(request.url)
-        if file_name and allowed_file(file_name):
+        if file and allowed_file(file.filename):
             # Find last char of file name before file extension
-            # index = file.filename.rfind('.')
+            index = file.filename.rfind('.')
             # Add datetime info to file name to avoid duplicate file uploads
-            file_name = file_name + datetime.now().strftime("%m%d%y%I%M%S") + file_type
+            file_name = file.filename[:index] + datetime.now().strftime("%m%d%y%I%M%S") + file.filename[index:]
+            file_type = file.filename[index:]
 
-            filename = secure_filename(file_name)
+            file = secure_filename(file_name)
             # Not saving locally
             # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
@@ -638,7 +649,7 @@ def upload():
 
             presigned_post = s3.generate_presigned_post(
                 Bucket = S3_BUCKET,
-                Key = filename,
+                Key = file,
                 Fields = {"acl": "public-read", "Content-Type": file_type},
                 Conditions = [
                     {"acl": "public-read"},
@@ -650,7 +661,7 @@ def upload():
     return json.dumps({
         #'filename':filename
         'data': presigned_post,
-        'url': 'https://%s.s3amazonaws.com/%s' % (S3_BUCKET, filename)
+        'url': 'https://%s.s3amazonaws.com/%s' % (S3_BUCKET, file)
     })
 
 @app.route("/edit/uploadEdit/<int:recipe_id>", methods=['POST'])

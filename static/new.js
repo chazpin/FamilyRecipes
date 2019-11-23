@@ -37,14 +37,13 @@ $(document).ready(function() {
     });
 });
 
-$('#fileupload').onchange = function () {
-  initUpload();
-}
 
-function initUpload() {
-    var file = $('#fileupload').prop('files')[0];
+$(function () {
+    /*if ($('#fileupload').val().length == 0){
+      return;
+    }*/
     $('#fileupload').fileupload({
-        url: 'upload?file_name=' + file.name + '&file_type=' + file.type,
+        url: 'upload',
         dataType: 'json',
         type: 'GET',
         add: function(e, data) {
@@ -61,7 +60,7 @@ function initUpload() {
             console.log(error);
         }
     });
-};
+});
 
 function uploadFile(file, s3Data, url){
   var xhr = new XMLHttpRequest();
