@@ -50,8 +50,8 @@ $(function () {
             data.submit(); // GET request to the upload method which will get signed AWS request -- Needs to return json dumps
         },
         success: function(response, status) { // Add the uploadFile example here
-            console.log(response.filename);
-            uploadFile(data.files[0], response.data, response.url);
+            console.log(response.file);
+            uploadFile(response.file, response.data, response.url);
 
               // var filePath = './static/images/' + response.filename;  Local Only
               console.log('success');
