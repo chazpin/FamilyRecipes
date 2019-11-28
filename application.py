@@ -641,7 +641,7 @@ def upload():
             file_name = file.filename[:index] + datetime.now().strftime("%m%d%y%I%M%S") + file.filename[index:]
             file_type = file.filename[index:]
 
-            file = secure_filename(file_name)
+            file_name = secure_filename(file_name)
             # Not saving locally
             # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
@@ -661,7 +661,7 @@ def upload():
     return json.dumps({
         #'filename':filename
         'data': presigned_post,
-        'url': 'https://%s.s3amazonaws.com/%s' % (S3_BUCKET, file),
+        'url': 'https://%s.s3amazonaws.com/%s' % (S3_BUCKET, file_name),
         'file': file
     })
 
