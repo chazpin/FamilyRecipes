@@ -641,7 +641,8 @@ def upload():
             file_name = file.filename[:index] + datetime.now().strftime("%m%d%y%I%M%S") + file.filename[index:]
             file_type = file.filename[index:]
 
-            file_name = secure_filename(file_name)
+            # don't think this is needed with aws s3 uploading
+            # file_name = secure_filename(file_name)
             # Not saving locally
             # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
