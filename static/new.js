@@ -75,8 +75,8 @@ function uploadFile(file, s3Data, url){
   xhr.onreadystatechange = function() {
     if(xhr.readyState === 4){
       if(xhr.status === 200 || xhr.status === 204){
-        $('#imgUpload').attr('src',response.url);
-        $('#filePath').val(response.url);
+        $('#imgUpload').attr('src',xhr.response.url);
+        $('#filePath').val(xhr.response.url);
       }
       else{
         alert("Could not upload file.");
