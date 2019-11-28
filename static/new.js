@@ -39,8 +39,6 @@ $(document).ready(function() {
 
 
 $(function () {
-    var file = $('#fileupload').prop('files');
-    console.log(file);
     $('#fileupload').fileupload({
         url: 'upload',
         dataType: 'json',
@@ -49,6 +47,8 @@ $(function () {
             data.submit(); // GET request to the upload method which will get signed AWS request -- Needs to return json dumps
         },
         success: function(response, status) { // Add the uploadFile example here
+            // file is not here
+            var file = $('#fileupload').prop('files');
             uploadFile(file, response.data, response.url);
 
               // var filePath = './static/images/' + response.filename;  Local Only
