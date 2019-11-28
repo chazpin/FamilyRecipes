@@ -661,8 +661,7 @@ def upload():
     return json.dumps({
         #'filename':filename
         'data': presigned_post,
-        'url': 'https://%s.s3amazonaws.com/%s' % (S3_BUCKET, file_name),
-        'file': file
+        'url': 'https://%s.s3amazonaws.com/%s' % (S3_BUCKET, file_name)
     })
 
 @app.route("/edit/uploadEdit/<int:recipe_id>", methods=['POST'])

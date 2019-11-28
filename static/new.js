@@ -51,7 +51,8 @@ $(function () {
         },
         success: function(response, status) { // Add the uploadFile example here
             console.log(response.file);
-            uploadFile(response.file, response.data, response.url);
+            var file = fileupload.files;
+            uploadFile(file, response.data, response.url);
 
               // var filePath = './static/images/' + response.filename;  Local Only
               console.log('success');
