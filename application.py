@@ -641,8 +641,7 @@ def upload():
             file_name = file.filename[:index] + datetime.now().strftime("%m%d%y%I%M%S") + file.filename[index:]
             file_type = file.filename[index:]
 
-            # don't think this is needed with aws s3 uploading
-            # file_name = secure_filename(file_name)
+            file_name = secure_filename(file_name)
             # Not saving locally
             # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
@@ -650,7 +649,7 @@ def upload():
 
             presigned_post = s3.generate_presigned_post(
                 Bucket = S3_BUCKET,
-                Key = file,
+                Key = file_name,
                 Fields = {"acl": "public-read", "Content-Type": file_type},
                 Conditions = [
                     {"acl": "public-read"},
