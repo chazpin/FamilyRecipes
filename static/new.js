@@ -50,7 +50,7 @@ $(function () {
     $('#fileupload').fileupload({
         url: 'upload',
         dataType: 'json',
-        type: 'POST',
+        type: 'GET',
         add: function(e, data) {
             data.submit(); // GET request to the upload method which will get signed AWS request -- Needs to return json dumps
         },
