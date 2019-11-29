@@ -22,6 +22,7 @@ from collections import defaultdict
 import datetime
 from datetime import datetime
 from mailjet_rest import Client
+from botocore.client import Config
 
 from helpers import login_required, apology, allowed_file
 
