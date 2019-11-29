@@ -50,17 +50,18 @@ $(function () {
     $('#fileupload').fileupload({
         url: 'upload',
         dataType: 'json',
-        type: 'GET',
+        type: 'POST',
         add: function(e, data) {
             data.submit(); // GET request to the upload method which will get signed AWS request -- Needs to return json dumps
         },
         success: function(response, status) { // Add the uploadFile example here
-            // file is not here
-            console.log(file);
-            uploadFile(file, response.data, response.url);
+            $('#imgUpload').attr('src',response.url);
+            $('#filePath').val(response.url);
 
-              // var filePath = './static/images/' + response.filename;  Local Only
-              console.log('success');
+            // uploadFile(file, response.data, response.url);
+
+            // var filePath = './static/images/' + response.filename;  Local Only
+            console.log('success');
         },
         error: function(error) {
             console.log(error);
@@ -81,8 +82,7 @@ function uploadFile(file, s3Data, url){
   xhr.onreadystatechange = function() {
     if(xhr.readyState === 4){
       if(xhr.status === 200 || xhr.status === 204){
-        $('#imgUpload').attr('src',xhr.response.url);
-        $('#filePath').val(xhr.response.url);
+
       }
       else{
         alert("Could not upload file.");

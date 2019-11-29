@@ -645,22 +645,29 @@ def upload():
             # Not saving locally
             # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-            s3 = boto3.client('s3')
-
-            presigned_post = s3.generate_presigned_post(
-                Bucket = S3_BUCKET,
-                Key = s3_key,
-                Fields = {"acl": "public-read", "Content-Type": file_type},
-                Conditions = [
-                    {"acl": "public-read"},
-                    {"Content-Type": file_type}
-                ],
-                ExpiresIn = 3600
+            s3 = boto3.resource(
+                's3',
+                aws_access_key_id=s3_key,
+                aws_secret_access_key=s3_secret,
+                config=Config(signature_version='s3v4')
             )
+            s3.Bucket(S3_BUCKET).put_object(Key=file_name, Body=file)
+
+            # s3 = boto3.client('s3')
+            # presigned_post = s3.generate_presigned_post(
+            #     Bucket = S3_BUCKET,
+            #     Key = s3_key,
+            #     Fields = {"acl": "public-read", "Content-Type": file_type},
+            #     Conditions = [
+            #         {"acl": "public-read"},
+            #         {"Content-Type": file_type}
+            #     ],
+            #     ExpiresIn = 3600
+            # )
 
     return json.dumps({
-        #'filename':filename
-        'data': presigned_post,
+        # 'filename':filename
+        # 'data': presigned_post,
         'url': 'https://%s.s3amazonaws.com/%s' % (S3_BUCKET, file_name)
     })
 
