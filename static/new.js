@@ -39,8 +39,10 @@ $(document).ready(function() {
 
 $(document).on("change", "#fileupload", function () {
 
-  var file = $('#fileupload').prop('files')[0];
-  console.log("file1 handler",$(this))
+  if ($('#fileupload').prop('files').length != 0){
+    var file = $('#fileupload').prop('files')[0];
+    console.log("file1 handler",$(this))
+  }
 });
 
 
