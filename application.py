@@ -629,7 +629,7 @@ def upload():
     if request.method == 'POST':
         #file_name = request.args.get('file_name')
         #file_type = request.args.get('file_type')
-        file = request.files['file']
+        file = request.files['fileupload']
         if file == '' or not file:
             flash('No selected file')
             return redirect(request.url)
