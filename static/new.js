@@ -37,21 +37,24 @@ $(document).ready(function() {
     });
 });
 
-var file = $('#fileupload');
+$(document).on("change", "#fileupload", function () {
+
+  var file = $('#fileupload').prop('files')[0];
+  console.log("file1 handler",$(this))
+});
+
 
 $(function () {
-  var actualFile = file.prop('files');
-  console.log(actualFile);
-    file.fileupload({
+    $('#fileupload').fileupload({
         url: 'upload',
         dataType: 'json',
-        type: 'GET',
         add: function(e, data) {
             data.submit(); // GET request to the upload method which will get signed AWS request -- Needs to return json dumps
         },
         success: function(response, status) { // Add the uploadFile example here
             // file is not here
-            uploadFile(actualFile, response.data, response.url);
+            console.log(file);
+            uploadFile(file, response.data, response.url);
 
               // var filePath = './static/images/' + response.filename;  Local Only
               console.log('success');
