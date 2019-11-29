@@ -50,10 +50,11 @@ app.logger.addHandler(handler)
 if (os.environ['FLASK_ENV'] == 'production'):
     api_key = os.environ.get('MAILJET_KEY')
     api_secret = os.environ.get('MAILJET_SECRET')
-
-# AWS S3 Configuration
-s3_key = os.environ.get("AWS_ACCESS_KEY_ID")
-s3_secret = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    # AWS S3 Configuration
+    s3_key = os.environ.get("AWS_ACCESS_KEY_ID")
+    s3_secret = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    S3_BUCKET = os.environ.get("S3_BUCKET_NAME")
+#else:
 
 # Ensure responses aren't cached
 @app.after_request
@@ -624,8 +625,6 @@ def autocomplete():
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    # Set required environment variables
-    S3_BUCKET = os.environ.get("S3_BUCKET_NAME")
 
     if request.method == 'POST':
         #file_name = request.args.get('file_name')
@@ -642,6 +641,7 @@ def upload():
             file_type = file.filename[index:]
 
             file_name = secure_filename(file_name)
+            print(file_name)
             # Not saving locally
             # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
@@ -649,7 +649,7 @@ def upload():
 
             presigned_post = s3.generate_presigned_post(
                 Bucket = S3_BUCKET,
-                Key = file_name,
+                Key = s3_key,
                 Fields = {"acl": "public-read", "Content-Type": file_type},
                 Conditions = [
                     {"acl": "public-read"},

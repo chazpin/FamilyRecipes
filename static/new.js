@@ -37,9 +37,12 @@ $(document).ready(function() {
     });
 });
 
+var file = $('#fileupload');
 
 $(function () {
-    $('#fileupload').fileupload({
+  var actualFile = file.prop('files');
+  console.log(actualFile);
+    file.fileupload({
         url: 'upload',
         dataType: 'json',
         type: 'GET',
@@ -48,8 +51,7 @@ $(function () {
         },
         success: function(response, status) { // Add the uploadFile example here
             // file is not here
-            var file = $('#fileupload').prop('files');
-            uploadFile(file, response.data, response.url);
+            uploadFile(actualFile, response.data, response.url);
 
               // var filePath = './static/images/' + response.filename;  Local Only
               console.log('success');
