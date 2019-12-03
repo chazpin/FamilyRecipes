@@ -656,7 +656,7 @@ def upload():
             s3.Bucket(S3_BUCKET).put_object(Key=file_name, Body=file, ACL='public-read')
 
             # generate a presigned url for the img preview
-            url = create_presigned_url('BUCKET_NAME', 'OBJECT_NAME')
+            url = create_presigned_url(S3_BUCKET, file_name)
             if url is not None:
                 presigned = url
 
