@@ -652,7 +652,7 @@ def upload():
                 aws_secret_access_key=s3_secret,
                 config=Config(signature_version='s3v4')
             )
-            s3.Bucket(S3_BUCKET).put_object(Key=file_name, Body=file)
+            s3.Bucket(S3_BUCKET).put_object(Key=file_name, Body=file, ACL='public-read')
 
             # s3 = boto3.client('s3')
             # presigned_post = s3.generate_presigned_post(
