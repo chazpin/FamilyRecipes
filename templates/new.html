@@ -34,16 +34,22 @@
             </div>
             <div class="form-group row">
                 <label for="txtPost">Photo</label>
-                <div class="input-group" style="display: inline-block">
-                    <img id="imgUpload" style="width: 140px; height: 140px;" class="img-thumbnail">
+                <div class="input-group" style="display: inline-block;">
+                    <img id="imgUpload" style="width: 140px; height: 140px; margin-bottom: 5px;" class="img-thumbnail">
                     <input type="hidden" name="filePath" id="filePath"></input>
-                <div class="pull-right" style="float: right">
-                    <span class="input-group-btn">
-                    <span class="btn btn-primary btn-file">
-                        Add Photo <input type="file" id="fileupload" name="fileupload">
-                    </span>
-                    </span>
+                    <div class="pull-right" style="float: right">
+                        <span class="input-group-btn">
+                        <span class="btn btn-primary btn-file">
+                            Add Photo <input type="file" id="fileupload" name="fileupload">
+                        </span>
+                        </span>
+                    </div>
+                    <div  class="progress active" style="width: 140px; height: 10px;" id="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%;"></div>
+                    </div>
                 </div>
+                <div>
+                    <span id="upMsg" style="font-size: 12px;"></span>
                 </div>
             </div>
             <fieldset id="addIngredients">

@@ -37,14 +37,6 @@ $(document).ready(function() {
     });
 });
 
-$(document).on("change", "#fileupload", function () {
-
-  if ($('#fileupload').prop('files').length != 0){
-    var file = $('#fileupload').prop('files')[0];
-    console.log("file1 handler",$(this))
-  }
-});
-
 
 $(function () {
     $('#fileupload').fileupload({
@@ -52,7 +44,15 @@ $(function () {
         dataType: 'json',
         type: 'POST',
         add: function(e, data) {
+            resetProgBar();
             data.submit(); // GET request to the upload method which will get signed AWS request -- Needs to return json dumps
+        },
+        progress: function(e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#progress .progress-bar').css(
+                'width',
+                progress + '%'
+            ).attr('aria-valuenow', progress);
         },
         success: function(response, status) { // Add the uploadFile example here
             $('#imgUpload').attr('src',response.url);
@@ -62,13 +62,26 @@ $(function () {
 
             // var filePath = './static/images/' + response.filename;  Local Only
             console.log('success');
+            $('#progress .progress-bar').attr('class', 'bg-success');
+            $('#upMsg').html("Upload Complete!").css('color', '#28a745');
         },
         error: function(error) {
             console.log(error);
+            $('#progress .progress-bar').attr('class', 'bg-danger');
+            $('#upMsg').html("Upload Failed!").css('color', '#dc3545');
         }
     });
 });
 
+function resetProgBar(){
+
+  $('#progress .bg-danger').css('width', 0).attr('aria-valuenow', 0).attr('class', 'progress-bar progress-bar-striped progress-bar-animated');
+  $('#progress .bg-success').css('width', 0).attr('aria-valuenow', 0).attr('class', 'progress-bar progress-bar-striped progress-bar-animated');
+  $('#upMsg').html("");
+
+}
+
+// No longer used. Sending upload from server side
 function uploadFile(file, s3Data, url){
   var xhr = new XMLHttpRequest();
   xhr.open("POST", s3Data.url);
