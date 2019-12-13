@@ -416,6 +416,8 @@ def recipe(recipe_id):
     # Use id to query recipe and recipe ingredient table for data to load onto page
     recipeInfo = db.execute("SELECT * FROM recipe where id = :ID", ID = recipe_id)
 
+    print(recipeInfo[0]["img_file_path"])
+
     # If there is a photo to load, need to generate a presigned S3 request to pass to the html template
     if recipeInfo[0]["img_file_path"] is not None and os.environ['FLASK_ENV'] == 'production':
         img_url = create_presigned_url(S3_BUCKET, recipeInfo[0]["img_file_path"])
