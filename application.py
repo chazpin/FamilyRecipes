@@ -735,7 +735,7 @@ def uploadEdit(recipe_id):
                 presigned = url
 
             # Now update the DB since we aren't submitting a form like on new recipe submission
-            db.execute("UPDATE recipe SET img_file_path = :filename WHERE id = :recipeID", file_name=file_name, recipeID=recipe_id)
+            db.execute("UPDATE recipe SET img_file_path = :file_name WHERE id = :recipeID", file_name=file_name, recipeID=recipe_id)
 
     return json.dumps({'url': presigned})
 
