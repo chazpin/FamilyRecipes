@@ -56,7 +56,7 @@ $(function () {
         },
         success: function(response, status) { // Add the uploadFile example here
             $('#imgUpload').attr('src',response.url);
-            $('#filePath').val(response.url.split('?')[0]); // get only the filename saved to S3 bucket
+            $('#filePath').val(response.url.split('?')[0].split('.com/')[1]); // get only the filename saved to S3 bucket
 
             // uploadFile(file, response.data, response.url);
 

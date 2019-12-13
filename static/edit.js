@@ -150,8 +150,8 @@ $(function() {
 
             $('#recipeImg').attr('src',response.url);
             $('#lightboxImg').attr('href', response.url);
-            $('#lightboxImg').attr('data-lightbox', response.url.split('?')[0]);
-            $('#filePath').val(response.url.split('?')[0]);
+            $('#lightboxImg').attr('data-lightbox', response.url.split('?')[0].split('.com/')[1]);
+            $('#filePath').val(response.url.split('?')[0].split('.com/')[1]);
 
             console.log('success');
             $('#progress .progress-bar').attr('class', 'bg-success');
