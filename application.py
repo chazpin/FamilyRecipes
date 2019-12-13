@@ -46,6 +46,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s -%(levelname)s - %(message
 handler.setFormatter(formatter)
 app.logger.addHandler(handler)
 
+
 # Mailjet account configuration
 # Removed api keys due to exposure on github.
 # Configure Email Address
@@ -415,13 +416,21 @@ def recipe(recipe_id):
     # Use id to query recipe and recipe ingredient table for data to load onto page
     recipeInfo = db.execute("SELECT * FROM recipe where id = :ID", ID = recipe_id)
 
+    # If there is a photo to load, need to generate a presigned S3 request to pass to the html template
+    if recipeInfo[0]["img_file_path"] is not None and os.environ['FLASK_ENV'] == 'production':
+        img_url = create_presigned_url(S3_BUCKET, recipeInfo[0]["img_file_path"])
+        if url is not None:
+            presigned_img = img_url
+    else: # for local testing
+        presigned_img = ""
+
     # Get ingredients for recipe using recipe id
     ingredientList = db.execute("SELECT i.name AS ingredient, ri.amount AS amount, mu.name AS measure FROM \
                                 recipe r JOIN recipe_ingredient ri on r.id = ri.recipe_id JOIN ingredient i \
                                 on i.id = ri.ingredient_id LEFT OUTER JOIN measure mu on mu.id = measure_id \
                                 WHERE r.id = :ID", ID = recipe_id)
 
-    return render_template("recipe.html", userName=userName, recipeInfo=recipeInfo, ingredientList=ingredientList)
+    return render_template("recipe.html", userName=userName, recipeInfo=recipeInfo, ingredientList=ingredientList, presigned_img=presigned_img)
 
 @app.route("/edit/<int:recipe_id>", methods=["GET", "POST"])
 @login_required
@@ -435,6 +444,14 @@ def edit(recipe_id):
         # Use id to query recipe and recipe ingredient table for data to load onto page
         recipeInfo = db.execute("SELECT * FROM recipe where id = :ID", ID = recipe_id)
 
+        # If there is a photo to load, need to generate a presigned S3 request to pass to the html template
+        if recipeInfo[0]["img_file_path"] is not None and os.environ['FLASK_ENV'] == 'production':
+            img_url = create_presigned_url(S3_BUCKET, recipeInfo[0]["img_file_path"])
+            if url is not None:
+                presigned_img = img_url
+        else: # for local testing
+            presigned_img = ""
+
         # Get ingredients for recipe using recipe id
         ingredientList = db.execute("SELECT i.name AS ingredient, i.id AS ingredient_id, ri.amount AS amount, \
                                     ri.recipe_id AS recipe_id, mu.name AS measure, mu.id AS measure_id FROM \
@@ -445,7 +462,7 @@ def edit(recipe_id):
         # Get list of measurements for dropdown list
         measureList = db.execute("SELECT DISTINCT(name) FROM measure")
 
-        return render_template("edit.html", recipeInfo=recipeInfo, ingredientList=ingredientList, measureList=measureList)
+        return render_template("edit.html", recipeInfo=recipeInfo, ingredientList=ingredientList, measureList=measureList, presigned_img=presigned_img)
 
     # POST method triggered with AJAX call
     else:
@@ -647,6 +664,9 @@ def upload():
             # Not saving locally
             # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
+            # actually put the img into the s3 bucket
+            # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html
+            # https://github.com/keithweaver/python-aws-s3/
             s3 = boto3.resource(
                 's3',
                 aws_access_key_id=s3_key,
@@ -681,24 +701,41 @@ def upload():
 
 @app.route("/edit/uploadEdit/<int:recipe_id>", methods=['POST'])
 def uploadEdit(recipe_id):
+
     if request.method == 'POST':
-        file = request.files['file']
-        if file.filename == '':
+        file = request.files['fileupload']
+        if file.filename == '' or not file:
             flash('No selected file')
             return redirect(request.url)
         if file and allowed_file(file.filename):
             # Find last char of file name before file extension
             index = file.filename.rfind('.')
             # Add datetime info to file name to avoid duplicate file uploads
-            file.filename = file.filename[:index] + datetime.now().strftime("%m%d%y%I%M%S") + file.filename[index:]
+            file_name = file.filename[:index] + datetime.now().strftime("%m%d%y%I%M%S") + file.filename[index:]
+            file_type = file.filename[index:]
 
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file_name = secure_filename(file_name)
+            # for local saving only
+            # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+            # actually put the img into the s3 bucket
+            s3 = boto3.resource(
+                's3',
+                aws_access_key_id=s3_key,
+                aws_secret_access_key=s3_secret,
+                config=Config(signature_version='s3v4')
+            )
+            s3.Bucket(S3_BUCKET).put_object(Key=file_name, Body=file, ACL='public-read')
+
+            # generate a presigned url for the img preview
+            url = create_presigned_url(S3_BUCKET, file_name)
+            if url is not None:
+                presigned = url
 
             # Now update the DB since we aren't submitting a form like on new recipe submission
             db.execute("UPDATE recipe SET img_file_path = :filename WHERE id = :recipeID", filename=filename, recipeID=recipe_id)
 
-    return json.dumps({'filename':filename})
+    return json.dumps({'url': presigned})
 
 ####################################################################################################
 # Helpers section - Moved from helpers.py due to confiction with werkzeug framework and db assignment

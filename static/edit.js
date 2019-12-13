@@ -48,13 +48,14 @@ $(document).ready(function() {
     });
 });
 
-function showLoading(){
-    $("body").addClass("loading");
-}
+// Using progress bar instead
+// function showLoading(){
+//     $("body").addClass("loading");
+// }
 
-function hideLoading(){
-    $("body").removeClass("loading");
-}
+// function hideLoading(){
+//     $("body").removeClass("loading");
+// }
 
 // AJAX method to handle recipe updates
 function editRecipe(recipe_id, fieldName, ingredient_id, measure_id){
@@ -127,67 +128,93 @@ function editRecipe(recipe_id, fieldName, ingredient_id, measure_id){
 }
 
 $(function() {
-    var ID = $("#recipeIDHidden").val();
+    var ID = $("#recipeIDHidden").val(); // Mimic the functionality in the new.js file
     $('#fileupload').fileupload({
         url: 'uploadEdit/' + ID,
         dataType: 'json',
         add: function(e, data) {
+            resetProgBar();
             data.submit();
-            showLoading();
+            // showLoading();
+        },
+        progress: function(e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#progress .progress-bar').css(
+                'width',
+                progress + '%'
+                ).attr('aria-valuenow', progress);
         },
         success: function(response, status) {
-            hideLoading();
-            console.log(response.filename);
-              var filePath = '/static/images/' + response.filename;
-              $('#recipeImg').attr('src',filePath);
-              $('#lightboxImg').attr('href', filePath);
-              $('#lightboxImg').attr('data-lightbox', response.filename);
-              $('#filePath').val(filePath);
-              console.log('success');
-            $('#dialogSuccess').dialog({
-                title: "Success!",
-                dialogClass: 'successHeader',
-                show: {
-                    effect: "blind",
-                    duration: 500
-                },
-                hide: {
-                    effect: "blind",
-                    duration: 500
-                },
-                buttons: {
-                    Ok: function(){
-                        $(this).dialog("close");
-                    }
-                }
-            });
+            // hideLoading();
+            // var filePath = '/static/images/' + response.filename; Local Only
+
+            $('#recipeImg').attr('src',response.url);
+            $('#lightboxImg').attr('href', response.url);
+            $('#lightboxImg').attr('data-lightbox', response.url.split('?')[0]);
+            $('#filePath').val(response.url).split('?')[0];
+
+            console.log('success');
+            $('#progress .progress-bar').attr('class', 'bg-success');
+            $('#upMsg').html("Upload Complete!").css('color', '#28a745');
+
+            // Replaced pop-up modal with progress bar
+            // $('#dialogSuccess').dialog({
+            //     title: "Success!",
+            //     dialogClass: 'successHeader',
+            //     show: {
+            //         effect: "blind",
+            //         duration: 500
+            //     },
+            //     hide: {
+            //         effect: "blind",
+            //         duration: 500
+            //     },
+            //     buttons: {
+            //         Ok: function(){
+            //             $(this).dialog("close");
+            //         }
+            //     }
+            // });
         },
         error: function(error) {
-            hideLoading();
+            // hideLoading();
             console.log(error);
-            $('#dialogFail').dialog({
-                title: "Oops!",
-                dialogClass: 'failHeader',
-                classes: {
-                    "ui-widget-header": "failHeader"
-                },
-                show: {
-                    effect: "blind",
-                    duration: 500
-                },
-                hide: {
-                    effect: "blind",
-                    duration: 500
-                },
-                buttons: {
-                    Ok: function(){
-                        $(this).dialog("close");
-                    }
-                }
-            });
+
+            $('#progress .progress-bar').attr('class', 'bg-danger');
+            $('#upMsg').html("Upload Failed!").css('color', '#dc3545');
+
+            // Replaced pop-up modal with progress bar
+            // $('#dialogFail').dialog({
+            //     title: "Oops!",
+            //     dialogClass: 'failHeader',
+            //     classes: {
+            //         "ui-widget-header": "failHeader"
+            //     },
+            //     show: {
+            //         effect: "blind",
+            //         duration: 500
+            //     },
+            //     hide: {
+            //         effect: "blind",
+            //         duration: 500
+            //     },
+            //     buttons: {
+            //         Ok: function(){
+            //             $(this).dialog("close");
+            //         }
+            //     }
+            // });
         }
     });
 });
+
+function resetProgBar(){
+
+  $('#progress .bg-danger').css('width', 0).attr('aria-valuenow', 0).attr('class', 'progress-bar progress-bar-striped progress-bar-animated');
+  $('#progress .bg-success').css('width', 0).attr('aria-valuenow', 0).attr('class', 'progress-bar progress-bar-striped progress-bar-animated');
+  $('#upMsg').html("");
+
+}
 
 // Example starter JavaScript for disabling form submissions if there are invalid fields
 (function() {

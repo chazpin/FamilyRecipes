@@ -20,8 +20,8 @@
             <small class="text-muted">Recipe By: {{ recipeInfo[0]['description'] }}</small>
         </h1>
         {% if recipeInfo[0].img_file_path %}
-        <a href="/static/images/{{ recipeInfo[0]['img_file_path'] }}" data-lightbox="{{ recipeInfo[0]['img_file_path'] }}" style="text-decoration: none;">
-          <img src="/static/images/{{ recipeInfo[0]['img_file_path'] }}" id="recipeImg" style="width: 140px; height: 140px;" class="img-thumbnail">
+        <a href="{{ presigned_img }}" data-lightbox="{{ presigned_img }}" style="text-decoration: none;">
+          <img src="{{ presigned_img }}" id="recipeImg" style="width: 140px; height: 140px;" class="img-thumbnail">
         </a>
         {% endif %}
         <br/>

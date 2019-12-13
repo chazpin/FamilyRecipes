@@ -10,7 +10,8 @@
 {% endblock %}
 
 {% block main %}
-    <div class="container">
+<div class="container">
+    <div class="containerStyle">
         <br/>
         <br/>
         <h1 class="display-4 addNewHeader">Edit your recipe!</h1>
@@ -34,17 +35,23 @@
         <div class="form-group row">
             <label for="txtPost">Photos</label>
             <div class="input-group" style="display: inline-block">
-                <a id="lightboxImg" href="/static/images/{{ recipeInfo[0]['img_file_path'] }}" data-lightbox="{{ recipeInfo[0]['img_file_path'] }}" style="text-decoration: none;">
-                  <img src="/static/images/{{ recipeInfo[0]['img_file_path'] }}" id="recipeImg" style="width: 140px; height: 140px;" class="img-thumbnail">
+                <a id="lightboxImg" href="{{ presigned_img }}" data-lightbox="{{ presigned_img }}" style="text-decoration: none;">
+                  <img src="{{ presigned_img }}" id="recipeImg" style="width: 140px; height: 140px;" class="img-thumbnail">
                 </a>
                 <input type="hidden" name="filePath" id="filePath"></input>
-            <div class="pull-right" style="float: right">
-                <span class="input-group-btn">
-                <span class="btn btn-warning btn-file">
-                    Update <input type="file" id="fileupload" name="file" multiple>
-                </span>
-                </span>
+                <div class="pull-right" style="float: right">
+                    <span class="input-group-btn">
+                    <span class="btn btn-warning btn-file">
+                        Update <input type="file" id="fileupload" name="file" multiple>
+                    </span>
+                    </span>
+                </div>
+                <div class="progress active" style="width: 140px; height: 10px;" id="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%;"></div>
+                </div>
             </div>
+            <div>
+                <span id="upMsg" style="font-size: 12px;"></span>
             </div>
         </div>
         {% endif %}
@@ -89,6 +96,8 @@
     </div>
 
     <div class="loadingModal"></div>
+</div>
+
 
     <script type="text/javascript" src="/static/edit.js"></script>
     <script type="text/javascript" src="/static/lightbox.js"></script>
