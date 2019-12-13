@@ -417,7 +417,7 @@ def recipe(recipe_id):
     recipeInfo = db.execute("SELECT * FROM recipe where id = :ID", ID = recipe_id)
 
     # If there is a photo to load, need to generate a presigned S3 request to pass to the html template
-    if (recipeInfo[0]["img_file_path"] is not None or recipeInfo[0]["img_file_path"] != '') and os.environ['FLASK_ENV'] == 'production':
+    if recipeInfo[0]["img_file_path"] is not None and recipeInfo[0]["img_file_path"] != '' and os.environ['FLASK_ENV'] == 'production':
         img_url = create_presigned_url(S3_BUCKET, recipeInfo[0]["img_file_path"])
         if img_url is not None:
             presigned_img = img_url
@@ -447,7 +447,7 @@ def edit(recipe_id):
         print(recipeInfo[0]["img_file_path"])
 
         # If there is a photo to load, need to generate a presigned S3 request to pass to the html template
-        if (recipeInfo[0]["img_file_path"] is not None or recipeInfo[0]["img_file_path"] != '') and os.environ['FLASK_ENV'] == 'production':
+        if recipeInfo[0]["img_file_path"] is not None and recipeInfo[0]["img_file_path"] != '' and os.environ['FLASK_ENV'] == 'production':
             img_url = create_presigned_url(S3_BUCKET, recipeInfo[0]["img_file_path"])
             if img_url is not None:
                 presigned_img = img_url
