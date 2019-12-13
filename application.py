@@ -419,7 +419,7 @@ def recipe(recipe_id):
     # If there is a photo to load, need to generate a presigned S3 request to pass to the html template
     if recipeInfo[0]["img_file_path"] is not None and os.environ['FLASK_ENV'] == 'production':
         img_url = create_presigned_url(S3_BUCKET, recipeInfo[0]["img_file_path"])
-        if url is not None:
+        if img_url is not None:
             presigned_img = img_url
     else: # for local testing
         presigned_img = ""
@@ -447,7 +447,7 @@ def edit(recipe_id):
         # If there is a photo to load, need to generate a presigned S3 request to pass to the html template
         if recipeInfo[0]["img_file_path"] is not None and os.environ['FLASK_ENV'] == 'production':
             img_url = create_presigned_url(S3_BUCKET, recipeInfo[0]["img_file_path"])
-            if url is not None:
+            if img_url is not None:
                 presigned_img = img_url
         else: # for local testing
             presigned_img = ""
@@ -750,7 +750,15 @@ def create_presigned_url(bucket_name, object_name, expiration=3600):
     """
 
     # Generate a presigned URL for the S3 object
-    s3_client = boto3.client('s3')
+    s3_client = boto3.resource(
+        's3',
+        aws_access_key_id=s3_key,
+        aws_secret_access_key=s3_secret,
+        config=Config(signature_version='s3v4')
+    )
+
+    # getting errors with 'client'
+    # s3_client = boto3.client('s3')
     try:
         response = s3_client.generate_presigned_url('get_object',
                                                     Params={'Bucket': bucket_name,
