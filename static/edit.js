@@ -20,17 +20,30 @@ $(document).ready(function() {
         var lastField = $('#newIngredients div:last');
         var intId = (lastField && lastField.length && lastField.data("idx") + 1) || 1;
         var fieldWrapper = $("<div class=\"form-group row ingredientRow newIngredient\" id=\"field" + intId + "\"/>");
-        var fIngredient = $("<input type=\"text\" class=\"form-control col-4 ingredient autoComp\" id=\"ingredient" + intId + "\" name=\"ingredient" + intId + "\" required autocomplete=\"Off\"/>");
-        var fAmount = $("<input type=\"text\" class=\"form-control col-2 offset-1 amount\" id=\"amount" + intId + "\" name=\"amount" + intId + "\" required/>");
+        var columnDivIngred = $("<div class=\"col-md-4 noPadLeft\"/>");
+        var columnDivAmt = $("<div class=\"col-md-2 noPadLeft\"/>");
+        var columnDivMeas = $("<div class=\"col-md-2 noPadLeft\"/>");
+        var columnDivRmv = $("<div class=\"col-md-4 noPadLeft\" id=\"removeDiv" + intId + "\"/>");
+        var fIngredLabel = $("<label class=\"label\" for=\"ingredient" + intId + "\">Ingredient</label>");
+        var fIngredient = $("<input type=\"text\" class=\"form-control ingredient autoComp\" id=\"ingredient" + intId + "\" name=\"ingredient" + intId + "\" required autocomplete=\"Off\"/>");
+        var fAmtLabel = $("<label class=\"label\" for=\"amount" + intId + "\">Amount</label>");
+        var fAmount = $("<input type=\"text\" class=\"form-control amount\" id=\"amount" + intId + "\" name=\"amount" + intId + "\" required/>");
+        var fMeasLabel = $("<label class=\"label\" for=\"measure" + intId + "\">Measure</label>");
         var fMeasure = $("input[id=measure" + recipeID + "]").clone().attr("id", "measure" + intId).attr("name", "measure" + intId).attr("value", "");
         var invalidMsg = $("<div class=\"invalid-feedback\">Please provide an ingredient name, measure and amount for all ingredients</div>");
         invalidMsg.data("idx", intId);
-        var removeButton = $("<input type=\"button\" class=\"btn btn-danger col-1 offset-1\" id=\"btnRemove" + intId + "\" value=\"Remove\" />");
+        var blankLabel = $("<label class=\"label\" for=\"rmvBtn" + intId + "\">&nbsp;</label>");
+        var removeButton = $("<input type=\"button\" class=\"form-control btn-danger rmvBtn\" id=\"btnRemove" + intId + "\" value=\"Remove\" />");
 
-        fieldWrapper.append(fIngredient);
-        fieldWrapper.append(fAmount);
-        fieldWrapper.append(fMeasure);
-        fieldWrapper.append(removeButton);
+        columnDivIngred.append(fIngredLabel);
+        columnDivIngred.append(fIngredient);
+        columnDivAmt.append(fAmtLabel);
+        columnDivAmt.append(fAmount);
+        columnDivMeas.append(fMeasLabel);
+        columnDivMeas.append(fMeasure);
+        columnDivRmv.append(blankLabel);
+        columnDivRmv.append(removeButton);
+        fieldWrapper.append('<hr style=\"width:100%\">', columnDivIngred, columnDivAmt, columnDivMeas, columnDivRmv);
         fieldWrapper.append(invalidMsg);
         $('#newIngredients').append(fieldWrapper);
 
@@ -42,8 +55,8 @@ $(document).ready(function() {
         // https://stackoverflow.com/questions/6658752/click-event-doesnt-work-on-dynamically-generated-elements
         // Handle removing the row and adding back the remove button to new last row
         $('#field' + intId).on('click', '#btnRemove' + intId, function() {
-            $(this).parent().remove();
-            $("#measure" + (intId - 1)).after("<input type=\"button\" class=\"btn btn-danger col-1 offset-1\" id=\"btnRemove" + (intId -1) + "\" value=\"Remove\" />");
+            $(this).parent().parent().remove();
+            $("#removeDiv" + (intId - 1)).html("<label class=\"label\" for=\"rmvBtn" + intId + "\">&nbsp;</label><input type=\"button\" class=\"form-control btn-danger rmvBtn\" id=\"btnRemove" + (intId -1) + "\" value=\"Remove\" />");
         });
     });
 });

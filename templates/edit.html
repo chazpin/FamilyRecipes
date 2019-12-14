@@ -7,6 +7,15 @@
 {% block head %}
 <link href="/static/styles.css" rel="stylesheet">
 <link href="/static/lightbox.css" rel="stylesheet">
+<style>
+    .noPadLeft{
+        padding-left: 0px;
+    }
+
+    .rmvBtn{
+        margin-right: 15px;
+    }
+</style>
 {% endblock %}
 
 {% block main %}
@@ -56,32 +65,40 @@
         </div>
         {% endif %}
         <fieldset id="addIngredients">
-            <div class="row">
-                <label class="col-4 labelRow" for="ingredient1">Ingredient</label>
-                <label class="col-2 offset-1 labelRow" for="amount1">Amount</label>
-                <label class="col-2 offset-1 labelRow" for="measure1">Measure</label>
-
-            </div>
             {% for ingredient in ingredientList %}
             <div class="form-group row ingredientRow">
-                <input type="text" class="form-control col-4 ingredient autoComp" id="ingredient{{ loop.index0 + recipeInfo[0]['id'] }}" name="ingredient" value="{{ ingredient['ingredient'] }}" autocomplete="Off"/>
-                <input type="text" class="form-control col-2 offset-1 amount" id="amount{{ loop.index0 + recipeInfo[0]['id'] }}" name="amount" value="{{ ingredient['amount'] }}" autocomplete="Off"/>
-                <input type="text" class="form-control col-2 offset-1 measure" id="measure{{ loop.index0 + recipeInfo[0]['id']}}" name="measure" list="measures" value="{{ ingredient['measure'] }}" autocomplete="Off">
+                <div class="col-md-4 noPadLeft">
+                    <label class="label" for="ingredient{{ loop.index0 + recipeInfo[0]['id'] }}">Ingredient</label>
+                    <input type="text" class="form-control ingredient autoComp" id="ingredient{{ loop.index0 + recipeInfo[0]['id'] }}" name="ingredient" value="{{ ingredient['ingredient'] }}" autocomplete="Off"/>
+                </div>
+                <div class="col-md-2 noPadLeft">
+                    <label class="label" for="amount{{ loop.index0 + recipeInfo[0]['id'] }}">Amount</label>
+                    <input type="text" class="form-control amount" id="amount{{ loop.index0 + recipeInfo[0]['id'] }}" name="amount" value="{{ ingredient['amount'] }}" autocomplete="Off"/>
+                </div>
+                <div class="col-md-2 noPadLeft">
+                    <label class="label" for="measure{{ loop.index0 + recipeInfo[0]['id'] }}">Measure</label>
+                    <input type="text" class="form-control measure" id="measure{{ loop.index0 + recipeInfo[0]['id']}}" name="measure" list="measures" value="{{ ingredient['measure'] }}" autocomplete="Off">
+                </div>
                     <datalist id="measures">
                         {% for measure in measureList %}
                         <option value="{{ measure['name'] }}">
                         {% endfor %}
                     </datalist>
-                <button type="button" id="updateIngredient" class="btn btn-warning offset-1" onclick="editRecipe({{ ingredient['recipe_id'] }}, 'ingredients', {{ ingredient['ingredient_id'] }}, {{ ingredient['measure_id'] }});">Update</button>
+                <div class="col-md-4 noPadLeft">
+                    <label class="label" for="updateIngredient">&nbsp;</label>
+                    <button type="button" id="updateIngredient" class="form-control btn-warning rmvBtn" onclick="editRecipe({{ ingredient['recipe_id'] }}, 'ingredients', {{ ingredient['ingredient_id'] }}, {{ ingredient['measure_id'] }});">Update</button>
+                </div>
             </div>
             {% endfor %}
         </fieldset>
         <form action="/edit/{{ recipeInfo[0]['id'] }}" method="POST" class="needs-validation" novalidate>
             <fieldset id="newIngredients">
             </fieldset>
-            <div class="row">
-                <button type="button" class="btn btn-secondary" id="add" value="Add Ingredient">Add Ingredient</button>
-                <button type="submit" class="btn btn-primary col-2 offset-10" id="submitRecipe">Save New Ingredients!</button>
+            <div class="form-group row">
+                <button type="button" class="btn btn-secondary btn-block" id="add" value="Add Ingredient">Add Ingredient</button>
+            </div>
+            <div class="form-group row">
+                <button type="submit" class="btn btn-primary btn-block" id="submitRecipe">Save New Ingredients!</button>
             </div>
             <input type="hidden" id="recipeIDHidden" name="recipeIDHidden" value="{{ recipeInfo[0]['id'] }}">
         </form>
