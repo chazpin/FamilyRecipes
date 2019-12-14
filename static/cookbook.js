@@ -84,7 +84,7 @@ var options = {
   bookTitle: "Mandy's Cookbook",
   bookUrl: '/',
   bookUrlText: 'Back to Dashboard',
-  bookUrlTitle: 'This is the book URL title',
+  bookUrlTitle: 'Click here to go back',
   // thumbnail is optional, but it is used in the info dialog
   thumbnail: '../static/BookReader/images/001.jpg',
   // Metadata is optional, but it is used in the info dialog
