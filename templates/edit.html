@@ -12,7 +12,7 @@
         padding-left: 0px;
     }
 
-    .rmvBtn{
+    .btnRight{
         margin-right: 15px;
     }
 </style>
@@ -86,7 +86,7 @@
                     </datalist>
                 <div class="col-md-4 noPadLeft">
                     <label class="label" for="updateIngredient">&nbsp;</label>
-                    <button type="button" id="updateIngredient" class="form-control btn-warning rmvBtn" onclick="editRecipe({{ ingredient['recipe_id'] }}, 'ingredients', {{ ingredient['ingredient_id'] }}, {{ ingredient['measure_id'] }});">Update</button>
+                    <button type="button" id="updateIngredient" class="form-control btn-warning btnRight" onclick="editRecipe({{ ingredient['recipe_id'] }}, 'ingredients', {{ ingredient['ingredient_id'] }}, {{ ingredient['measure_id'] }});">Update</button>
                 </div>
             </div>
             {% endfor %}
@@ -95,10 +95,10 @@
             <fieldset id="newIngredients">
             </fieldset>
             <div class="form-group row">
-                <button type="button" class="btn btn-secondary btn-block" id="add" value="Add Ingredient">Add Ingredient</button>
+                <button type="button" class="btn btn-secondary btn-block btnRight" id="add" value="Add Ingredient">Add Ingredient</button>
             </div>
             <div class="form-group row">
-                <button type="submit" class="btn btn-primary btn-block" id="submitRecipe">Save New Ingredients!</button>
+                <button type="submit" class="btn btn-primary btn-block btnRight" id="submitRecipe">Save New Ingredients!</button>
             </div>
             <input type="hidden" id="recipeIDHidden" name="recipeIDHidden" value="{{ recipeInfo[0]['id'] }}">
         </form>

@@ -32,7 +32,7 @@ $(document).ready(function() {
         var invalidMsg = $("<div class=\"invalid-feedback\">Please provide an ingredient name, measure and amount for all ingredients</div>");
         invalidMsg.data("idx", intId);
         var blankLabel = $("<label class=\"label\" for=\"rmvBtn" + intId + "\">&nbsp;</label>");
-        var removeButton = $("<input type=\"button\" class=\"form-control btn-danger rmvBtn\" id=\"rmvBtn" + intId + "\" value=\"Remove\" />");
+        var removeButton = $("<input type=\"button\" class=\"form-control btn-danger btnRight\" id=\"rmvBtn" + intId + "\" value=\"Remove\" />");
         removeButton.click(function() {
             $(this).parent().parent().remove();
         });

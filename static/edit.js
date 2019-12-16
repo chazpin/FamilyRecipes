@@ -56,7 +56,7 @@ $(document).ready(function() {
         // Handle removing the row and adding back the remove button to new last row
         $('#field' + intId).on('click', '#btnRemove' + intId, function() {
             $(this).parent().parent().remove();
-            $("#removeDiv" + (intId - 1)).html("<label class=\"label\" for=\"rmvBtn" + intId + "\">&nbsp;</label><input type=\"button\" class=\"form-control btn-danger rmvBtn\" id=\"btnRemove" + (intId -1) + "\" value=\"Remove\" />");
+            $("#removeDiv" + (intId - 1)).html("<label class=\"label\" for=\"rmvBtn" + intId + "\">&nbsp;</label><input type=\"button\" class=\"form-control btn-danger btnRight\" id=\"btnRemove" + (intId -1) + "\" value=\"Remove\" />");
         });
     });
 });
