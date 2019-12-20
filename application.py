@@ -416,13 +416,21 @@ def recipe(recipe_id):
     # Use id to query recipe and recipe ingredient table for data to load onto page
     recipeInfo = db.execute("SELECT * FROM recipe where id = :ID", ID = recipe_id)
 
-    # If there is a photo to load, need to generate a presigned S3 request to pass to the html template
-    if recipeInfo[0]["img_file_path"] is not None and recipeInfo[0]["img_file_path"] != '' and os.environ['FLASK_ENV'] == 'production':
-        img_url = create_presigned_url(S3_BUCKET, recipeInfo[0]["img_file_path"])
-        if img_url is not None:
-            presigned_img = img_url
-    else: # for local testing
-        presigned_img = ""
+    # Get any images associated with recipe (can make this into a single joined query at some point)
+    recipeImgs = db.execute("SELECT * FROM recipe_images where recipe_id_fk = :ID", ID = recipe_id)
+
+    presigned_img = []
+
+    # For each photo to load, need to generate a presigned S3 request to pass to the html template
+    if recipeImgs is not None:
+        for image in recipeImgs:
+            if image["img_path"] is not None and image["img_path"] != '':
+                if os.environ['FLASK_ENV'] == 'production':
+                    img_url = create_presigned_url(S3_BUCKET, image["img_path"])
+                    if img_url is not None:
+                        presigned_img.append(img_url)
+                else:
+                    presigned_img.append(image["img_path"])
 
     # Get ingredients for recipe using recipe id
     ingredientList = db.execute("SELECT i.name AS ingredient, ri.amount AS amount, mu.name AS measure FROM \
@@ -444,15 +452,22 @@ def edit(recipe_id):
         # Use id to query recipe and recipe ingredient table for data to load onto page
         recipeInfo = db.execute("SELECT * FROM recipe where id = :ID", ID = recipe_id)
 
-        print(recipeInfo[0]["img_file_path"])
+        # Get any images associated with recipe (can make this into a single joined query at some point)
+        recipeImgs = db.execute("SELECT * FROM recipe_images where recipe_id_fk = :ID", ID = recipe_id)
 
-        # If there is a photo to load, need to generate a presigned S3 request to pass to the html template
-        if recipeInfo[0]["img_file_path"] is not None and recipeInfo[0]["img_file_path"] != '' and os.environ['FLASK_ENV'] == 'production':
-            img_url = create_presigned_url(S3_BUCKET, recipeInfo[0]["img_file_path"])
-            if img_url is not None:
-                presigned_img = img_url
-        else: # for local testing
-            presigned_img = ""
+        presigned_img = {}
+
+        # For each photo to load, need to generate a presigned S3 request to pass to the html template
+        if recipeImgs is not None:
+            for image in recipeImgs:
+                if image["img_path"] is not None and image["img_path"] != '':
+                    if os.environ['FLASK_ENV'] == 'production':
+                        img_url = create_presigned_url(S3_BUCKET, image["img_path"])
+                        if img_url is not None:
+                            presigned_img[image["id"]] = img_url
+                    else:
+                        presigned_img[image["id"]] = image["img_path"]
+        print(presigned_img)
 
         # Get ingredients for recipe using recipe id
         ingredientList = db.execute("SELECT i.name AS ingredient, i.id AS ingredient_id, ri.amount AS amount, \
@@ -495,6 +510,20 @@ def edit(recipe_id):
                 flash("There was a problem trying to add the new ingredients", "danger")
 
             return redirect("/edit/" + recipeID)
+
+@app.route("/edit/removeImg/<int:img_id>", methods=["GET", "POST"])
+@login_required
+def removeImg(img_id):
+
+    if request.method == "POST":
+        recipeID = request.form.get('recipeId')
+        if img_id is not None and recipeID is not None:
+            db.execute("DELETE FROM recipe_images WHERE id = :ID and recipe_id_fk = :recipeIdFk", ID = img_id, recipeIdFk = recipeID)
+
+            return ("deleted")
+        return ("error")
+    else:
+        return ("not a post")
 
 @app.route("/new", methods=["GET", "POST"])
 @login_required
@@ -644,8 +673,8 @@ def autocomplete():
         results.append(query[0]['name'])
     return jsonify(matching_results=results)
 
-@app.route('/upload', methods=['POST'])
-def upload():
+@app.route('/upload/<int:recipe_id>', methods=['POST'])
+def upload(recipe_id=None):
 
     if request.method == 'POST':
         #file_name = request.args.get('file_name')
@@ -662,47 +691,57 @@ def upload():
             file_type = file.filename[index:]
 
             file_name = secure_filename(file_name)
-            print(file_name)
-            # Not saving locally
-            # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-            # actually put the img into the s3 bucket
-            # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html
-            # https://github.com/keithweaver/python-aws-s3/
-            s3 = boto3.resource(
-                's3',
-                aws_access_key_id=s3_key,
-                aws_secret_access_key=s3_secret,
-                config=Config(signature_version='s3v4')
-            )
-            s3.Bucket(S3_BUCKET).put_object(Key=file_name, Body=file, ACL='public-read')
+            if environ.os['FLASK_ENV'] == 'development':
+                # saving locally
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
+                presigned = '/static/images/' + file_name
+            else:
+                # actually put the img into the s3 bucket
+                # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-presigned-urls.html
+                # https://github.com/keithweaver/python-aws-s3/
+                s3 = boto3.resource(
+                    's3',
+                    aws_access_key_id=s3_key,
+                    aws_secret_access_key=s3_secret,
+                    config=Config(signature_version='s3v4')
+                )
+                s3.Bucket(S3_BUCKET).put_object(Key=file_name, Body=file, ACL='public-read')
 
-            # generate a presigned url for the img preview
-            url = create_presigned_url(S3_BUCKET, file_name)
-            if url is not None:
-                presigned = url
+                # generate a presigned url for the img preview
+                url = create_presigned_url(S3_BUCKET, file_name)
+                if url is not None:
+                    presigned = url
 
-            # s3 = boto3.client('s3')
-            # presigned_post = s3.generate_presigned_post(
-            #     Bucket = S3_BUCKET,
-            #     Key = s3_key,
-            #     Fields = {"acl": "public-read", "Content-Type": file_type},
-            #     Conditions = [
-            #         {"acl": "public-read"},
-            #         {"Content-Type": file_type}
-            #     ],
-            #     ExpiresIn = 3600
-            # )
+                # s3 = boto3.client('s3')
+                # presigned_post = s3.generate_presigned_post(
+                #     Bucket = S3_BUCKET,
+                #     Key = s3_key,
+                #     Fields = {"acl": "public-read", "Content-Type": file_type},
+                #     Conditions = [
+                #         {"acl": "public-read"},
+                #         {"Content-Type": file_type}
+                #     ],
+                #     ExpiresIn = 3600
+                # )
+
+    # If there is no recipe ID, then it's a new recipe that hasn't been saved yet. We'll need to assume it will be the next recipe to be saved
+    if recipe_id is None:
+        recipe_id = db.execute("SELECT MAX(id) FROM recipe")
+    else:
+        db.execute("INSERT INTO recipe_images (id, recipe_id_fk, img_path) VALUES (NULL, :recipeIdFk, :img_path)", recipeIdFk=recipe_id, img_path=file_name)
 
     return json.dumps({
         # 'filename':filename
         # 'data': presigned_post,
         #'url': 'https://%s.s3amazonaws.com/%s' % (S3_BUCKET, file_name)
-        'url': presigned
+        'url': presigned,
+        'recipeID': recipe_id,
+        'imgID': imgID
     })
 
-@app.route("/edit/uploadEdit/<int:recipe_id>", methods=['POST'])
-def uploadEdit(recipe_id):
+@app.route("/edit/uploadEdit/<int:recipe_id>/<int:img_id>", methods=['POST'])
+def uploadEdit(recipe_id, img_id):
 
     if request.method == 'POST':
         file = request.files['fileupload']
@@ -717,27 +756,30 @@ def uploadEdit(recipe_id):
             file_type = file.filename[index:]
 
             file_name = secure_filename(file_name)
-            # for local saving only
-            # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-            # actually put the img into the s3 bucket
-            s3 = boto3.resource(
-                's3',
-                aws_access_key_id=s3_key,
-                aws_secret_access_key=s3_secret,
-                config=Config(signature_version='s3v4')
-            )
-            s3.Bucket(S3_BUCKET).put_object(Key=file_name, Body=file, ACL='public-read')
+            if environ.os['FLASK_ENV'] == 'development':
+                # for local saving only
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
+                presigned = '/static/images/' + file_name
+            else:
+                # actually put the img into the s3 bucket
+                s3 = boto3.resource(
+                    's3',
+                    aws_access_key_id=s3_key,
+                    aws_secret_access_key=s3_secret,
+                    config=Config(signature_version='s3v4')
+                )
+                s3.Bucket(S3_BUCKET).put_object(Key=file_name, Body=file, ACL='public-read')
 
-            # generate a presigned url for the img preview
-            url = create_presigned_url(S3_BUCKET, file_name)
-            if url is not None:
-                presigned = url
+                # generate a presigned url for the img preview
+                url = create_presigned_url(S3_BUCKET, file_name)
+                if url is not None:
+                    presigned = url
 
             # Now update the DB since we aren't submitting a form like on new recipe submission
-            db.execute("UPDATE recipe SET img_file_path = :file_name WHERE id = :recipeID", file_name=file_name, recipeID=recipe_id)
+            db.execute("UPDATE recipe_images SET img_path = :img_path WHERE id = :imgID AND recipe_id_fk = :recipeIdFk)", img_path=file_name, img_ID = img_id recipeIdFk=recipe_id)
 
-    return json.dumps({'url': presigned})
+    return json.dumps({'url': presigned, 'recipeID': recipe_id, 'imgId': img_ID})
 
 ####################################################################################################
 # Helpers section - Moved from helpers.py due to confiction with werkzeug framework and db assignment

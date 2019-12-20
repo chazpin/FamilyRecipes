@@ -40,22 +40,47 @@
             <textarea class="form-control instructions" id="instructions" name="instructions" style="height: 10em;" maxlength="5000">{{ recipeInfo[0]['instructions'] }}</textarea>
             <button type="button" id="updateInstructions" class="btn btn-warning btn-update" onclick="editRecipe({{ recipeInfo[0]['id'] }}, 'instructions', null, null);">Update</button>
         </div>
-        {% if recipeInfo[0].img_file_path %}
-        <div class="form-group row">
-            <label for="txtPost">Photos</label>
-            <div class="input-group" style="display: inline-block">
-                <a id="lightboxImg" href="{{ presigned_img }}" data-lightbox="{{ presigned_img }}" style="text-decoration: none;">
-                  <img src="{{ presigned_img }}" id="recipeImg" style="width: 140px; height: 140px;" class="img-thumbnail">
-                </a>
+        {% if presigned_img %}
+            <label for="recipeImg">Photos</label>
+            {% for img_url in presigned_img %}
+            <div class="form-group row" id="photoDiv{{ img_url }}">
+                <div class="input-group" style="display: inline-block">
+                    <a id="lightboxImg{{ img_url }}" href="{{ presigned_img[img_url] }}" data-lightbox="{{ recipeInfo[0]['id'] }}_images" style="text-decoration: none;">
+                      <img src="{{ presigned_img[img_url] }}" id="recipeImg{{ img_url }}" style="width: 140px; height: 140px; margin-bottom: 5px;" class="img-thumbnail">
+                    </a>
+                    <input type="hidden" name="filePath{{ img_url }}" id="filePath{{ img_url }}"></input>
+                    <input type="hidden" name="imgIDHidden{{ img_url }}" id="imgIDHidden{{ img_url }}" value="{{ img_url }}"></input>
+                    <div id="btnRow{{ img_url }}" class="pull-right" style="float: right">
+                        <span class="input-group-btn">
+                        <span class="btn btn-warning btn-file">
+                            Update <input type="file" id="fileuploadEDIT" name="fileuploadEDIT" >
+                        </span>
+                            <input type="button" class="btn btn-danger btn-file" id="btnRemove{{ img_url }}" onclick="removeImg({{ recipeInfo[0]['id'] }}, {{ img_url }} );" value="Remove" >
+                        </span>
+                    </div>
+                    <div class="progress active" style="width: 140px; height: 10px;" id="progress{{ img_url }}">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div>
+                    <span id="upMsg{{ img_url }}" style="font-size: 12px;"></span>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        <div class="form-group row" id="photoDiv">
+            <div class="input-group" style="display: inline-block;">
+                <img id="imgUpload" style="width: 140px; height: 140px; margin-bottom: 5px;" class="img-thumbnail">
                 <input type="hidden" name="filePath" id="filePath"></input>
-                <div class="pull-right" style="float: right">
+                <input type="hidden" name="imgIDHidden" id="imgIDHidden"></input>
+                <div id="btnRow" class="pull-right" style="float: right">
                     <span class="input-group-btn">
-                    <span class="btn btn-warning btn-file">
-                        Update <input type="file" id="fileupload" name="fileupload" >
-                    </span>
+                        <span class="btn btn-primary btn-file">
+                            Add Photo <input type="file" id="fileuploadNEW" name="fileuploadNEW">
+                        </span>
                     </span>
                 </div>
-                <div class="progress active" style="width: 140px; height: 10px;" id="progress">
+                <div  class="progress active" style="width: 140px; height: 10px;" id="progress">
                     <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%;"></div>
                 </div>
             </div>
@@ -63,7 +88,6 @@
                 <span id="upMsg" style="font-size: 12px;"></span>
             </div>
         </div>
-        {% endif %}
         <fieldset id="addIngredients">
             {% for ingredient in ingredientList %}
             <div class="form-group row ingredientRow">
@@ -85,8 +109,10 @@
                         {% endfor %}
                     </datalist>
                 <div class="col-md-4 noPadLeft">
-                    <label class="label" for="updateIngredient">&nbsp;</label>
-                    <button type="button" id="updateIngredient" class="form-control btn-warning btnRight" onclick="editRecipe({{ ingredient['recipe_id'] }}, 'ingredients', {{ ingredient['ingredient_id'] }}, {{ ingredient['measure_id'] }});">Update</button>
+                    <div class="float-right">
+                        <label class="label" for="updateIngredient">&nbsp;</label>
+                        <button type="button" id="updateIngredient" class="form-control btn-warning" onclick="editRecipe({{ ingredient['recipe_id'] }}, 'ingredients', {{ ingredient['ingredient_id'] }}, {{ ingredient['measure_id'] }});">Update</button>
+                    </div>
                 </div>
             </div>
             {% endfor %}

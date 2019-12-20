@@ -45,15 +45,16 @@
                     Please provide some instructions
                 </div>
             </div>
-            <div class="form-group row">
+            <div class="form-group row" id="photoDiv">
                 <label for="txtPost">Photo</label>
                 <div class="input-group" style="display: inline-block;">
                     <img id="imgUpload" style="width: 140px; height: 140px; margin-bottom: 5px;" class="img-thumbnail">
                     <input type="hidden" name="filePath" id="filePath"></input>
+                    <input type="hidden" name="imgIDHidden" id="imgIDHidden"></input>
                     <div class="pull-right" style="float: right">
                         <span class="input-group-btn">
                         <span class="btn btn-primary btn-file">
-                            Add Photo <input type="file" id="fileupload" name="fileupload">
+                            Add Photo <input type="file" id="fileuploadNEW" name="fileuploadNEW">
                         </span>
                         </span>
                     </div>
@@ -95,6 +96,7 @@
             <div class="form-group row">
                 <button type="submit" class="btn btn-primary btn-block btnRight" id="submitRecipe">Add Recipe!</button>
             </div>
+            <input type="hidden" id="recipeIDHidden" name="recipeIDHidden" >
         </form>
     </div>
 </div>

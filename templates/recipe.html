@@ -19,10 +19,12 @@
         <h1>
             <small class="text-muted">Recipe By: {{ recipeInfo[0]['description'] }}</small>
         </h1>
-        {% if recipeInfo[0].img_file_path %}
-        <a href="{{ presigned_img }}" data-lightbox="{{ presigned_img }}" style="text-decoration: none;">
-          <img src="{{ presigned_img }}" id="recipeImg" style="width: 140px; height: 140px;" class="img-thumbnail">
-        </a>
+        {% if presigned_img %}
+          {% for img_url in presigned_img %}
+          <a href="{{ img_url }}" data-lightbox="{{ recipeInfo[0]['id'] }}_images" style="text-decoration: none;">
+            <img src="{{ img_url }}" id="recipeImg" style="width: 140px; height: 140px;" class="img-thumbnail">
+          </a>
+          {% endfor %}
         {% endif %}
         <br/>
         <br/>
