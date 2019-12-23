@@ -56,9 +56,7 @@
             <small class="text-muted lead">Submitted By: {{ recipeInfo[0]['user_created'] }}</small>
         </h6>
         {% if userName == recipeInfo[0]['user_created'] %}
-        <a href="/edit/{{ recipeInfo[0]['id'] }}">
-          <button type="button" class="btn btn-primary btn-block" id="edit">Edit Recipe</button>
-        </a>
+          <button type="button" class="btn btn-primary btn-block" id="edit" onclick="window.location.href = '/edit/{{ recipeInfo[0]['id'] }}';">Edit Recipe</button>
         {% endif %}
     </div>
 </div>

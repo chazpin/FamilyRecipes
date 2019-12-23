@@ -467,7 +467,6 @@ def edit(recipe_id):
                             presigned_img[image["id"]] = img_url
                     else:
                         presigned_img[image["id"]] = image["img_path"]
-        print(presigned_img)
 
         # Get ingredients for recipe using recipe id
         ingredientList = db.execute("SELECT i.name AS ingredient, i.id AS ingredient_id, ri.amount AS amount, \
@@ -673,7 +672,7 @@ def autocomplete():
         results.append(query[0]['name'])
     return jsonify(matching_results=results)
 
-@app.route('/upload/<int:recipe_id>', methods=['POST'])
+@app.route('/edit/upload/<int:recipe_id>', methods=['POST'])
 def upload(recipe_id=None):
 
     if request.method == 'POST':
@@ -692,7 +691,7 @@ def upload(recipe_id=None):
 
             file_name = secure_filename(file_name)
 
-            if environ.os['FLASK_ENV'] == 'development':
+            if os.environ['FLASK_ENV'] == 'development':
                 # saving locally
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
                 presigned = '/static/images/' + file_name
@@ -729,7 +728,14 @@ def upload(recipe_id=None):
     if recipe_id is None:
         recipe_id = db.execute("SELECT MAX(id) FROM recipe")
     else:
-        db.execute("INSERT INTO recipe_images (id, recipe_id_fk, img_path) VALUES (NULL, :recipeIdFk, :img_path)", recipeIdFk=recipe_id, img_path=file_name)
+        if os.environ['FLASK_ENV'] == 'development':
+            db.execute("INSERT INTO recipe_images (id, recipe_id_fk, img_path) VALUES (NULL, :recipeIdFk, :img_path)", recipeIdFk=recipe_id, img_path=presigned) # local needs the '/static/images/'' prefix
+        else:
+            db.execute("INSERT INTO recipe_images (id, recipe_id_fk, img_path) VALUES (NULL, :recipeIdFk, :img_path)", recipeIdFk=recipe_id, img_path=file_name)
+
+    # Need to get the newly saved imgID - MAX sequence of recipe images table should be easy enough
+    imgID = db.execute("SELECT MAX(id) FROM recipe_images")
+
 
     return json.dumps({
         # 'filename':filename
@@ -737,7 +743,7 @@ def upload(recipe_id=None):
         #'url': 'https://%s.s3amazonaws.com/%s' % (S3_BUCKET, file_name)
         'url': presigned,
         'recipeID': recipe_id,
-        'imgID': imgID
+        'imgID': imgID[0]['MAX(id)']
     })
 
 @app.route("/edit/uploadEdit/<int:recipe_id>/<int:img_id>", methods=['POST'])
@@ -757,7 +763,7 @@ def uploadEdit(recipe_id, img_id):
 
             file_name = secure_filename(file_name)
 
-            if environ.os['FLASK_ENV'] == 'development':
+            if os.environ['FLASK_ENV'] == 'development':
                 # for local saving only
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], file_name))
                 presigned = '/static/images/' + file_name
@@ -777,9 +783,12 @@ def uploadEdit(recipe_id, img_id):
                     presigned = url
 
             # Now update the DB since we aren't submitting a form like on new recipe submission
-            db.execute("UPDATE recipe_images SET img_path = :img_path WHERE id = :imgID AND recipe_id_fk = :recipeIdFk)", img_path=file_name, img_ID=img_id, recipeIdFk=recipe_id)
+            if os.environ['FLASK_ENV'] == 'development':
+                db.execute("UPDATE recipe_images SET img_path = :img_path WHERE recipe_id_fk = :recipeIdFk AND id = :imgID", imgID=img_id, recipeIdFk=recipe_id, img_path=presigned) # local needs the '/static/images/'' prefix
+            else:
+                db.execute("UPDATE recipe_images SET img_path = :img_path WHERE recipe_id_fk = :recipeIdFk AND id = :imgID", imgID=img_id, recipeIdFk=recipe_id, img_path=file_name)
 
-    return json.dumps({'url': presigned, 'recipeID': recipe_id, 'imgId': img_ID})
+    return json.dumps({'url': presigned, 'recipeID': recipe_id, 'imgID': img_id})
 
 ####################################################################################################
 # Helpers section - Moved from helpers.py due to confiction with werkzeug framework and db assignment
@@ -928,28 +937,27 @@ def errorhandler(e):
     if not isinstance(e, HTTPException):
         e = InternalServerError()
 
-    # Send error email
-    mailjet = Client(auth=(api_key, api_secret), version='v3.1')
-    data = {
-      'Messages': [
-        {
-          "From": {
-            "Email": "FamilyRecipesRobot@gmail.com",
-            "Name": "Frank the Family Recpies Robot"
-          },
-          "To": [
+    # Send error email if production
+    if os.environ["FLASK_ENV"] == 'production':
+        mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+        data = {
+          'Messages': [
             {
-              "Email": "FamilyRecipesRobot@gmail.com"
+              "From": {
+                "Email": "FamilyRecipesRobot@gmail.com",
+                "Name": "Frank the Family Recpies Robot"
+              },
+              "To": [
+                {
+                  "Email": "FamilyRecipesRobot@gmail.com"
+                }
+              ],
+              "Subject": "Family Recipes Application Error",
+              "TextPart": e.name + "\n" + e.description + "\n" + "Check errorLog.txt for more detailed error information."
             }
-          ],
-          "Subject": "Family Recipes Application Error",
-          "TextPart": e.name + "\n" + e.description + "\n" + "Check errorLog.txt for more detailed error information."
+          ]
         }
-      ]
-    }
-    result = mailjet.send.create(data=data)
-    print (result.status_code)
-    print (result.json())
+        result = mailjet.send.create(data=data)
 
     return apology(e.name, e.code)
 

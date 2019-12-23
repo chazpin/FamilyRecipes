@@ -197,7 +197,7 @@
                             }
                         );
                     });
-                } else {
+                } else if (template) {
                     template = that._renderDownload(files)[
                         that.options.prependFiles ? 'prependTo' : 'appendTo'
                     ](that.options.filesContainer);
@@ -245,7 +245,7 @@
                                     );
                                 }
                             );
-                        } else {
+                        } else if (deferred) {
                             deferred = that._addFinishedDeferreds();
                             that._transition($(this)).done(
                                 function () {
@@ -324,14 +324,16 @@
                 if (e.isDefaultPrevented()) {
                     return false;
                 }
-                var that = $(this).data('blueimp-fileupload') ||
-                        $(this).data('fileupload');
-                that._resetFinishedDeferreds();
-                that._transition($(this).find('.fileupload-progress')).done(
-                    function () {
-                        that._trigger('started', e);
-                    }
-                );
+                    var that = $(this).data('blueimp-fileupload') ||
+                            $(this).data('fileupload');
+                    if (that){
+                    that._resetFinishedDeferreds();
+                    that._transition($(this).find('.fileupload-progress')).done(
+                        function () {
+                            that._trigger('started', e);
+                        }
+                    );
+                }
             },
             // Callback for uploads stop, equivalent to the global ajaxStop event:
             stop: function (e) {
@@ -339,21 +341,23 @@
                     return false;
                 }
                 var that = $(this).data('blueimp-fileupload') ||
-                        $(this).data('fileupload'),
-                    deferred = that._addFinishedDeferreds();
-                $.when.apply($, that._getFinishedDeferreds())
-                    .done(function () {
-                        that._trigger('stopped', e);
-                    });
-                that._transition($(this).find('.fileupload-progress')).done(
-                    function () {
-                        $(this).find('.progress')
-                            .attr('aria-valuenow', '0')
-                            .children().first().css('width', '0%');
-                        $(this).find('.progress-extended').html('&nbsp;');
-                        deferred.resolve();
-                    }
-                );
+                        $(this).data('fileupload');
+                    if (that){
+                        deferred = that._addFinishedDeferreds();
+                    $.when.apply($, that._getFinishedDeferreds())
+                        .done(function () {
+                            that._trigger('stopped', e);
+                        });
+                    that._transition($(this).find('.fileupload-progress')).done(
+                        function () {
+                            $(this).find('.progress')
+                                .attr('aria-valuenow', '0')
+                                .children().first().css('width', '0%');
+                            $(this).find('.progress-extended').html('&nbsp;');
+                            deferred.resolve();
+                        }
+                    );
+                }
             },
             processstart: function (e) {
                 if (e.isDefaultPrevented()) {

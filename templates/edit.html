@@ -49,17 +49,17 @@
                       <img src="{{ presigned_img[img_url] }}" id="recipeImg{{ img_url }}" style="width: 140px; height: 140px; margin-bottom: 5px;" class="img-thumbnail">
                     </a>
                     <input type="hidden" name="filePath{{ img_url }}" id="filePath{{ img_url }}"></input>
-                    <input type="hidden" name="imgIDHidden{{ img_url }}" id="imgIDHidden{{ img_url }}" value="{{ img_url }}"></input>
                     <div id="btnRow{{ img_url }}" class="pull-right" style="float: right">
+                        <input type="hidden" name="imgIDHidden" id="imgIDHidden" value="{{ img_url }}"></input>
                         <span class="input-group-btn">
                         <span class="btn btn-warning btn-file">
-                            Update <input type="file" id="fileuploadEDIT" name="fileuploadEDIT" >
+                            Update <input type="file" class="fileuploadEDIT" id="fileuploadEDIT{{ img_url }}" name="fileupload" >
                         </span>
                             <input type="button" class="btn btn-danger btn-file" id="btnRemove{{ img_url }}" onclick="removeImg({{ recipeInfo[0]['id'] }}, {{ img_url }} );" value="Remove" >
                         </span>
                     </div>
-                    <div class="progress active" style="width: 140px; height: 10px;" id="progress{{ img_url }}">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%;"></div>
+                    <div class="progress active" style="width: 140px; height: 10px;" >
+                        <div id="progress{{ img_url }}" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%;"></div>
                     </div>
                 </div>
                 <div>
@@ -76,12 +76,12 @@
                 <div id="btnRow" class="pull-right" style="float: right">
                     <span class="input-group-btn">
                         <span class="btn btn-primary btn-file">
-                            Add Photo <input type="file" id="fileuploadNEW" name="fileuploadNEW">
+                            Add Photo <input type="file" class="fileuploadNEW" id="fileuploadNEW" name="fileupload">
                         </span>
                     </span>
                 </div>
-                <div  class="progress active" style="width: 140px; height: 10px;" id="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%;"></div>
+                <div class="progress active" style="width: 140px; height: 10px;" >
+                    <div id="progress" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width: 0%;"></div>
                 </div>
             </div>
             <div>

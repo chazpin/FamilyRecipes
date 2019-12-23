@@ -104,16 +104,16 @@ function removeImg(recipeId, imgId){
     });
 }
 
-$(function () {
+$(document).on('click', '.fileuploadNEW', function () {
     var newPhotoRow = "<div class=\"form-group row\" id=\"photoDiv\"><div class=\"input-group\" style=\"display: inline-block;\">" +
     "<img id=\"imgUpload\" style=\"width: 140px; height: 140px; margin-bottom: 5px;\" class=\"img-thumbnail\"><input type=\"hidden\" name=\"filePath\" id=\"filePath\">" +
-    "</input><input type=\"hidden\" name=\"imgIDHidden\" id=\"imgIDHidden\"></input><div class=\"pull-right\" style=\"float: right\"><span class=\"input-group-btn\">" +
-    "<span class=\"btn btn-primary btn-file\">Add Photo <input type=\"file\" id=\"fileuploadNEW\" name=\"fileuploadNEW\"></span></span></div>" +
-    "<div  class=\"progress active\" style=\"width: 140px; height: 10px;\" id=\"progress\">" +
-    "<div class=\"progress-bar progress-bar-striped progress-bar-animated\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\" style=\"width: 0%;\">" +
+    "</input><input type=\"hidden\" name=\"imgIDHidden\" id=\"imgIDHidden\"></input><div id=\"btnRow\" class=\"pull-right\" style=\"float: right\"><span class=\"input-group-btn\">" +
+    "<span class=\"btn btn-primary btn-file\">Add Photo <input type=\"file\" class=\"fileuploadNEW\" id=\"fileuploadNEW\" name=\"fileupload\"></span></span></div>" +
+    "<div  class=\"progress active\" style=\"width: 140px; height: 10px;\" >" +
+    "<div id=\"progress\" class=\"progress-bar progress-bar-striped progress-bar-animated\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\" style=\"width: 0%;\">" +
     "</div></div></div><div><span id=\"upMsg\" style=\"font-size: 12px;\"></span></div></div>";
 
-    $('#fileuploadNEW').fileupload({
+    $('.fileuploadNEW').fileupload({
         url: 'upload/' + ID, // Don't yet have the recipe ID because it's new and hasn't been saved to the DB yet
         dataType: 'json',
         type: 'POST',
@@ -123,7 +123,7 @@ $(function () {
         },
         progress: function(e, data) {
             var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .progress-bar').css(
+            $('#progress').css(
                 'width',
                 progress + '%'
             ).attr('aria-valuenow', progress);
@@ -131,12 +131,16 @@ $(function () {
         success: function(response, status) { // Add the uploadFile example here
             // Set the new attributes to the only non-id'd parameters, them update them with their new ids so we can add another add photo template
             var updateRmvRow = "<span class=\"input-group-btn\"><span class=\"btn btn-warning btn-file\">" +
-            "Update <input type=\"file\" id=\"fileuploadEDIT\" name=\"fileuploadEDIT\" ></span>" +
+            "Update <input type=\"file\" class=\"fileuploadEDIT\" id=\"fileuploadEDIT" + response.imgID +
+            "\" name=\"fileupload\" ></span>" +
             "<input type=\"button\" class=\"btn btn-danger btn-file\" id=\"btnRemove" + response.imgID +
             " onclick=\"removeImg(" + response.recipeID + "," + response.imgID +"); value=\"Remove\" ></span>"
 
+            var lightBoxRow = "<a id=\"lightboxImg\" href=\"\" data-lightbox=\"\" style=\"text-decoration: none;\"></a>";
+
             $('#recipeIDHidden').val(response.recipeID);
 
+            $('imgUpload').wrap(lightBoxRow); // Need to add the lightbox reference after the img upload
             $('#imgUpload').attr('src',response.url);
             $('#imgUpload').attr('id', 'recipeImg' + response.imgID);
 
@@ -144,7 +148,7 @@ $(function () {
             $('#imgIDHidden').attr('id', 'imgIDHidden' + response.imgID);
 
             $('#lightboxImg').attr('href', response.url);
-            $('#lightboxImg').attr('data-lightbox', response.recipeID);
+            $('#lightboxImg').attr('data-lightbox', response.recipeID + "_images");
             $('#lightboxImg').attr('id', 'lightboxImg' + response.imgID);
 
             $('#filePath').val(response.url.split('?')[0].split('.com/')[1]); // get only the filename saved to S3 bucket
@@ -153,8 +157,8 @@ $(function () {
 
             // var filePath = './static/images/' + response.filename;  Local Only
             console.log('success');
-            $('#progress .progress-bar').attr('class', 'bg-success');
-            $('#progress .progress-bar').attr('id', 'progress' + response.imgID)
+            $('#progress').attr('class', 'bg-success');
+            $('#progress').attr('id', 'progress' + response.imgID)
 
             $('#upMsg').html("Upload Complete!").css('color', '#28a745');
             $('#upMsg').attr('id', 'upMsg' + response.imgID)
@@ -169,26 +173,28 @@ $(function () {
         },
         error: function(error) {
             console.log(error);
-            $('#progress .progress-bar').attr('class', 'bg-danger');
+            $('#progress').attr('class', 'bg-danger');
             $('#upMsg').html("Upload Failed!").css('color', '#dc3545');
         }
     });
 });
 
-$(function() {
+$(document).on('click', '.fileuploadEDIT', function() {
     var ID = $("#recipeIDHidden").val(); // Mimic the functionality in the new.js file
-    var imgID = $("#imgIDHidden").val();
+    var imgID; // Needed for parts of the AJAX function
+
     $('#fileuploadEDIT').fileupload({
-        url: 'uploadEdit/' + ID + '/' + imgID,
+        url: 'uploadEdit/' + ID + '/' + $(this).closest('div').find('input').val(), // this is the imgID
         dataType: 'json',
         add: function(e, data) {
+            imgID = $(this).closest('div').find('input').val();
             resetProgBar(imgID);
             data.submit();
             // showLoading();
         },
         progress: function(e, data) {
             var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .progress-bar').css(
+            $('#progress' + imgID).css(
                 'width',
                 progress + '%'
                 ).attr('aria-valuenow', progress);
@@ -197,21 +203,21 @@ $(function() {
             // hideLoading();
             // var filePath = '/static/images/' + response.filename; Local Only
 
-            $('#recipeImg' + imgID).attr('src',response.url);
-            $('#lightboxImg' + imgID).attr('href', response.url);
-            $('#lightboxImg' + imgID).attr('data-lightbox', response.recipeID);
-            $('#filePath' + imgID).val(response.url.split('?')[0].split('.com/')[1]);
+            $('#recipeImg' + response.imgID).attr('src',response.url);
+            $('#lightboxImg' + response.imgID).attr('href', response.url);
+            $('#lightboxImg' + response.imgID).attr('data-lightbox', response.recipeID + "_images");
+            $('#filePath' + response.imgID).val(response.url.split('?')[0].split('.com/')[1]);
 
             console.log('success');
-            $('#progress' + imgID + ' .progress-bar').attr('class', 'bg-success');
-            $('#upMsg' + imgID).html("Upload Complete!").css('color', '#28a745');
+            $('#progress' + response.imgID ).attr('class', 'bg-success');
+            $('#upMsg' + response.imgID).html("Upload Complete!").css('color', '#28a745');
 
         },
         error: function(error) {
             // hideLoading();
             console.log(error);
 
-            $('#progress' + imgID + ' .progress-bar').attr('class', 'bg-danger');
+            $('#progress' + imgID ).attr('class', 'bg-danger');
             $('#upMsg' + imgID).html("Upload Failed!").css('color', '#dc3545');
         }
     });

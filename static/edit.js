@@ -196,119 +196,128 @@ function editRecipe(recipe_id, fieldName, ingredient_id, measure_id){
     });
 }
 
-$(function () {
+$(document).on('click', '.fileuploadNEW', function () {
     var ID = $("#recipeIDHidden").val();
     var newPhotoRow = "<div class=\"form-group row\" id=\"photoDiv\"><div class=\"input-group\" style=\"display: inline-block;\">" +
     "<img id=\"imgUpload\" style=\"width: 140px; height: 140px; margin-bottom: 5px;\" class=\"img-thumbnail\"><input type=\"hidden\" name=\"filePath\" id=\"filePath\">" +
-    "</input><input type=\"hidden\" name=\"imgIDHidden\" id=\"imgIDHidden\"></input><div class=\"pull-right\" style=\"float: right\"><span class=\"input-group-btn\">" +
-    "<span class=\"btn btn-primary btn-file\">Add Photo <input type=\"file\" id=\"fileuploadNEW\" name=\"fileuploadNEW\"></span></span></div>" +
-    "<div  class=\"progress active\" style=\"width: 140px; height: 10px;\" id=\"progress\">" +
-    "<div class=\"progress-bar progress-bar-striped progress-bar-animated\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\" style=\"width: 0%;\">" +
+    "</input><input type=\"hidden\" name=\"imgIDHidden\" id=\"imgIDHidden\"></input><div id=\"btnRow\" class=\"pull-right\" style=\"float: right\"><span class=\"input-group-btn\">" +
+    "<span class=\"btn btn-primary btn-file\">Add Photo <input type=\"file\" class=\"fileuploadNEW\" id=\"fileuploadNEW\" name=\"fileupload\"></span></span></div>" +
+    "<div  class=\"progress active\" style=\"width: 140px; height: 10px;\" >" +
+    "<div id=\"progress\" class=\"progress-bar progress-bar-striped progress-bar-animated\" role=\"progressbar\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"0\" style=\"width: 0%;\">" +
     "</div></div></div><div><span id=\"upMsg\" style=\"font-size: 12px;\"></span></div></div>";
 
-    $('#fileuploadNEW').fileupload({
-        url: 'upload/' + ID,
-        dataType: 'json',
-        type: 'POST',
-        add: function(e, data) {
-            resetProgBar();
-            data.submit(); // GET request to the upload method which will get signed AWS request -- Needs to return json dumps
-        },
-        progress: function(e, data) {
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .progress-bar').css(
-                'width',
-                progress + '%'
-            ).attr('aria-valuenow', progress);
-        },
-        success: function(response, status) { // Add the uploadFile example here
-            // Set the new attributes to the only non-id'd parameters, them update them with their new ids so we can add another add photo template
-            var updateRmvRow = "<span class=\"input-group-btn\"><span class=\"btn btn-warning btn-file\">" +
-            "Update <input type=\"file\" id=\"fileuploadEDIT\" name=\"fileuploadEDIT\" ></span>" +
-            "<input type=\"button\" class=\"btn btn-danger btn-file\" id=\"btnRemove" + response.imgID +
-            " onclick=\"removeImg(" + response.recipeID + "," + response.imgID +"); value=\"Remove\" ></span>"
-
-
-            $('#imgUpload').attr('src',response.url);
-            $('#imgUpload').attr('id', 'recipeImg' + response.imgID);
-
-            $('#imgIDHidden').val(response.imgID);
-            $('#imgIDHidden').attr('id', 'imgIDHidden' + response.imgID);
-
-            $('#lightboxImg').attr('href', response.url);
-            $('#lightboxImg').attr('data-lightbox', response.recipeID);
-            $('#lightboxImg').attr('id', 'lightboxImg' + response.imgID);
-
-            $('#filePath').val(response.url.split('?')[0].split('.com/')[1]); // get only the filename saved to S3 bucket
-            $('#filePath').attr('id', 'filePath' + response.imgID);
-
-            $('#photoDiv').attr('id', 'photoDiv' + response.imgID);
-
-            // var filePath = './static/images/' + response.filename;  Local Only
-            console.log('success');
-            $('#progress .progress-bar').attr('class', 'bg-success');
-            $('#progress .progress-bar').attr('id', 'progress' + response.imgID)
-            $('#upMsg').html("Upload Complete!").css('color', '#28a745');
-            $('#upMsg').attr('id', 'upMsg' + response.imgID)
-
-            // Remove 'Add New' button and add Update/Remove buttons to newly added photo
-            $('#btnRow > pull-right').remove();
-            $('#btnRow').append(updateRmvRow);
-            $('#btnRow').attr('id', 'btnRow' + response.imgID);
-
-            // Need to add a new file upload row
-            $('#photoDiv' + response.imgID).append(newPhotoRow);
-
-        },
-        error: function(error) {
-            console.log(error);
-            $('#progress .progress-bar').attr('class', 'bg-danger');
-            $('#upMsg').html("Upload Failed!").css('color', '#dc3545');
-        }
-    });
-});
-
-$(function() {
-    var ID = $("#recipeIDHidden").val(); // Mimic the functionality in the new.js file
-    var imgID = $("#imgIDHidden").val();
-    $('#fileuploadEDIT').fileupload({
-        url: 'uploadEdit/' + ID + '/' + imgID,
-        dataType: 'json',
-        add: function(e, data) {
-            resetProgBar(imgID);
-            data.submit();
-            // showLoading();
-        },
-        progress: function(e, data) {
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .progress-bar').css(
-                'width',
-                progress + '%'
+    // $('.fileuploadNEW').each(function(){
+    $('.fileuploadNEW').fileupload({
+            url: 'upload/' + ID,
+            dataType: 'json',
+            type: 'POST',
+            add: function(e, data) {
+                resetProgBar();
+                data.submit(); // GET request to the upload method which will get signed AWS request -- Needs to return json dumps
+            },
+            progress: function(e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#progress').css(
+                    'width',
+                    progress + '%'
                 ).attr('aria-valuenow', progress);
-        },
-        success: function(response, status) {
-            // hideLoading();
-            // var filePath = '/static/images/' + response.filename; Local Only
+            },
+            success: function(response, status) { // Add the uploadFile example here
+                // Set the new attributes to the only non-id'd parameters, them update them with their new ids so we can add another add photo template
+                var updateRmvRow = "<span class=\"input-group-btn\"><span class=\"btn btn-warning btn-file btn-space\">" +
+                "Update <input type=\"file\" class=\"fileuploadEDIT\" id=\"fileuploadEDIT" + response.imgID +
+                "\" name=\"fileupload\" ></span>" +
+                "<input type=\"button\" class=\"btn btn-danger btn-file\" id=\"btnRemove" + response.imgID +
+                "\" onclick=\"removeImg(" + response.recipeID + "," + response.imgID + ");\" value=\"Remove\" ></span>";
 
-            $('#recipeImg' + imgID).attr('src',response.url);
-            $('#lightboxImg' + imgID).attr('href', response.url);
-            $('#lightboxImg' + imgID).attr('data-lightbox', response.recipeID);
-            $('#filePath' + imgID).val(response.url.split('?')[0].split('.com/')[1]);
+                var lightBoxRow = "<a id=\"lightboxImg\" href=\"\" data-lightbox=\"\" style=\"text-decoration: none;\"></a>";
 
-            console.log('success');
-            $('#progress' + imgID + ' .progress-bar').attr('class', 'bg-success');
-            $('#upMsg' + imgID).html("Upload Complete!").css('color', '#28a745');
+                $('#imgUpload').wrap(lightBoxRow); // Need to add the lightbox reference after the img upload
+                $('#imgUpload').attr('src',response.url);
+                $('#imgUpload').attr('id', 'recipeImg' + response.imgID);
 
-        },
-        error: function(error) {
-            // hideLoading();
-            console.log(error);
+                $('#imgIDHidden').val(response.imgID);
+                $('#imgIDHidden').attr('id', 'imgIDHidden' + response.imgID);
 
-            $('#progress' + imgID + ' .progress-bar').attr('class', 'bg-danger');
-            $('#upMsg' + imgID).html("Upload Failed!").css('color', '#dc3545');
-        }
+                $('#lightboxImg').attr('href', response.url);
+                $('#lightboxImg').attr('data-lightbox', response.recipeID + "_images");
+                $('#lightboxImg').attr('id', 'lightboxImg' + response.imgID);
+
+                $('#filePath').val(response.url.split('?')[0].split('.com/')[1]); // get only the filename saved to S3 bucket
+                $('#filePath').attr('id', 'filePath' + response.imgID);
+
+                $('#photoDiv').attr('id', 'photoDiv' + response.imgID);
+
+                // var filePath = './static/images/' + response.filename;  Local Only
+                console.log('success');
+                $('#progress').attr('class', 'bg-success');
+                $('#progress').attr('id', 'progress' + response.imgID)
+                $('#upMsg').html("Upload Complete!").css('color', '#28a745');
+                $('#upMsg').attr('id', 'upMsg' + response.imgID)
+
+                // Remove old 'Add Photo' button
+
+                // Remove 'Add New' button and add Update/Remove buttons to newly added photo
+                $('#btnRow').empty(); // remove all child elements
+                $('#btnRow').append(updateRmvRow); // Add update and remove buttons
+                $('#btnRow').attr('id', 'btnRow' + response.imgID); // ID tag the necessary elements
+
+                // Need to add a new file upload row
+                $('#photoDiv' + response.imgID).after(newPhotoRow);
+
+            },
+            error: function(error) {
+                console.log(error);
+                $('#progress').attr('class', 'bg-danger');
+                $('#upMsg').html("Upload Failed!").css('color', '#dc3545');
+            }
+        });
     });
-});
+
+$(document).on('click', '.fileuploadEDIT', function() {
+    var ID = $("#recipeIDHidden").val(); // Mimic the functionality in the new.js file
+    var imgID; // Needed for parts of the AJAX function
+
+        // $('.fileuploadEDIT').each(function(){
+        $('.fileuploadEDIT').fileupload({
+            url: 'uploadEdit/' + ID + '/' + $(this).closest('div').find('input').val(), // this is the imgID
+            dataType: 'json',
+            add: function(e, data) {
+                imgID = $(this).closest('div').find('input').val();
+                resetProgBar(imgID);
+                data.submit();
+                // showLoading();
+            },
+            progress: function(e, data) {
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#progress' + imgID).css(
+                    'width',
+                    progress + '%'
+                    ).attr('aria-valuenow', progress);
+            },
+            success: function(response, status) {
+                // hideLoading();
+                // var filePath = '/static/images/' + response.filename; Local Only
+
+                $('#recipeImg' + response.imgID).attr('src',response.url);
+                $('#lightboxImg' + response.imgID).attr('href', response.url);
+                $('#lightboxImg' + response.imgID).attr('data-lightbox', response.recipeID + "_images");
+                $('#filePath' + response.imgID).val(response.url.split('?')[0].split('.com/')[1]);
+
+                console.log('success');
+                $('#progress' + response.imgID ).attr('class', 'bg-success');
+                $('#upMsg' + response.imgID).html("Upload Complete!").css('color', '#28a745');
+
+            },
+            error: function(error) {
+                // hideLoading();
+                console.log(error);
+
+                $('#progress' + imgID ).attr('class', 'bg-danger');
+                $('#upMsg' + imgID).html("Upload Failed!").css('color', '#dc3545');
+            }
+        });
+    });
 
 function resetProgBar(imgID){
     if (imgID == null){
