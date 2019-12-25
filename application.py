@@ -174,7 +174,7 @@ def register():
 
             # Redirect user to activation page and flash login success message
             flash("Hooray, you were successfully registered! We've sent a message to the email address you provided that contains a link to confirm your account registration. " +
-                    "Follow the link in the email to begin using Family Recipes or click below to enter the key manually.", 'success')
+                    "Follow the link in the email to begin using Family Recipes or click below to enter the provided key manually.", 'success')
             return render_template("activation.html")
 
     # handle new user registration submission
@@ -602,7 +602,7 @@ def new():
 
         # Now save FIRST ingredient, measure, and amount to the recipe_ingredients table using the ingredient and measure primary keys
         db.execute("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, measure_id, amount) VALUES (:key, :ingredient, :measure, :amount)",
-        key=recipeKey[0]["max"], ingredient=ingredientIDs[0], measure=measureIDs[0], amount=request.form.get("amount1"))
+        key=recipeKey[0]["MAX(id)"], ingredient=ingredientIDs[0], measure=measureIDs[0], amount=request.form.get("amount1"))
 
         while ingredients >= i:
             # Check if ingredient and measure already exist in the DB
@@ -929,7 +929,6 @@ def addNewIngredients(request, recipeID):
         return True
 
     except:
-        print(sys.exc_info()[0])
         return False
 
 def errorhandler(e):
