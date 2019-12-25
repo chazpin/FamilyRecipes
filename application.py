@@ -841,7 +841,8 @@ def updateRecipe(recipe_id, field, update):
             field = "author"
 
         return ("The " + field + " of your recipe has been updated!")
-    except:
+    except e:
+        print(e)
         return ("There was a problem updating the " + field + " of your recipe.")
 
 def updateIngredients(recipe_id, ingredientUpdate, ingredient_id, amountUpdate, measureUpdate, measure_id):
@@ -881,7 +882,8 @@ def updateIngredients(recipe_id, ingredientUpdate, ingredient_id, amountUpdate, 
                     OldIngredientID=ingredient_id, OldMeasureID=measure_id)
 
         return ("The ingredient in your recipe has been updated!")
-    except:
+    except e:
+        print(e)
         return ("There was a problem updating the ingredient in your recipe.")
 
 def addNewIngredients(request, recipeID):
