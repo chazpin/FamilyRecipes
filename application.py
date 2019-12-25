@@ -924,7 +924,7 @@ def addNewIngredients(request, recipeID):
                 measureIDs.append(measureAdd)
 
             #Now save remaining ingredients, measures, and amounts to the recipe_ingredients table using the ingredient and measure primary keys
-            db.execute("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, measure_id, amount) VALUES (:key, :ingredient, :measure, :amount)",
+            db.execute("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, measure_id, amount) VALUES (:key, :ingredient, :measure, :amount) RETURNING lastval()",
             key=recipeID, ingredient=ingredientIDs[i - 1], measure=measureIDs[i - 1],amount=request.form.get("amount" + str(i)))
             i += 1
 
