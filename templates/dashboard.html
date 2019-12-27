@@ -17,7 +17,6 @@
             <th scope="col">Recipe Name</th>
             <th scope="col">Author</th>
             <th scope="col">Added By</th>
-            <th scope="col">Date Added</th>
           </tr>
         </thead>
         <tbody>
@@ -26,7 +25,6 @@
             <td><a href="/recipe/{{ recipe['id'] }}">{{ recipe['name'] }}</a></td>
             <td>{{ recipe['description'] }}</td>
             <td>{{ recipe['user_created'] }}</td>
-            <td>{{ recipe['date_created'] }}</td>
           </tr>
           {% endfor %}
         </tbody>
