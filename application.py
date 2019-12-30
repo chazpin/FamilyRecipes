@@ -739,9 +739,9 @@ def upload(recipe_id=None):
         recipe_id = db.execute("SELECT MAX(id) FROM recipe")
     else:
         if os.environ['FLASK_ENV'] == 'development':
-            db.execute("INSERT INTO recipe_images (id, recipe_id_fk, img_path) VALUES (NULL, :recipeIdFk, :img_path)", recipeIdFk=recipe_id, img_path=presigned) # local needs the '/static/images/'' prefix
+            db.execute("INSERT INTO recipe_images (recipe_id_fk, img_path) VALUES (:recipeIdFk, :img_path)", recipeIdFk=recipe_id, img_path=presigned) # local needs the '/static/images/'' prefix
         else:
-            db.execute("INSERT INTO recipe_images (id, recipe_id_fk, img_path) VALUES (NULL, :recipeIdFk, :img_path)", recipeIdFk=recipe_id, img_path=file_name)
+            db.execute("INSERT INTO recipe_images (recipe_id_fk, img_path) VALUES (:recipeIdFk, :img_path)", recipeIdFk=recipe_id, img_path=file_name)
 
     # Need to get the newly saved imgID - MAX sequence of recipe images table should be easy enough
     imgID = db.execute("SELECT MAX(id) FROM recipe_images")
