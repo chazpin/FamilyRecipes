@@ -601,8 +601,13 @@ def new():
             recipeName=request.form.get("name"), user=username[0]["username"])
 
         # Now save FIRST ingredient, measure, and amount to the recipe_ingredients table using the ingredient and measure primary keys
-        db.execute("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, measure_id, amount) VALUES (:key, :ingredient, :measure, :amount)",
-        key=recipeKey[0]["max"], ingredient=ingredientIDs[0], measure=measureIDs[0], amount=request.form.get("amount1"))
+        # phpliteadmin and postgresql return different alias when selecting max id
+        if os.environ["FLASK_ENV"] == 'production':
+            db.execute("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, measure_id, amount) VALUES (:key, :ingredient, :measure, :amount)",
+            key=recipeKey[0]["max"], ingredient=ingredientIDs[0], measure=measureIDs[0], amount=request.form.get("amount1"))
+        else:
+            db.execute("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, measure_id, amount) VALUES (:key, :ingredient, :measure, :amount)",
+            key=recipeKey[0]["MAX(id)"], ingredient=ingredientIDs[0], measure=measureIDs[0], amount=request.form.get("amount1"))
 
         while ingredients >= i:
             # Check if ingredient and measure already exist in the DB
@@ -633,8 +638,13 @@ def new():
                 measureIDs.append(measureAdd)
 
             #Now save remaining ingredients, measures, and amounts to the recipe_ingredients table using the ingredient and measure primary keys
-            db.execute("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, measure_id, amount) VALUES (:key, :ingredient, :measure, :amount)",
-            key=recipeKey[0]["max"], ingredient=ingredientIDs[i - 1], measure=measureIDs[i - 1],amount=request.form.get("amount" + str(i)))
+            # phpliteadmin and postgresql return different alias when selecting max id
+            if os.environ["FLASK_ENV"] == 'production':
+                db.execute("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, measure_id, amount) VALUES (:key, :ingredient, :measure, :amount)",
+                key=recipeKey[0]["max"], ingredient=ingredientIDs[i - 1], measure=measureIDs[i - 1],amount=request.form.get("amount" + str(i)))
+            else:
+                db.execute("INSERT INTO recipe_ingredient (recipe_id, ingredient_id, measure_id, amount) VALUES (:key, :ingredient, :measure, :amount)",
+                key=recipeKey[0]["MAX(id)"], ingredient=ingredientIDs[i - 1], measure=measureIDs[i - 1],amount=request.form.get("amount" + str(i)))
             i += 1
 
         flash("You've successfully added your recipe! It will now appear in your list of recipes below and be searchable to other users.", 'success')
@@ -736,6 +746,10 @@ def upload(recipe_id=None):
     # Need to get the newly saved imgID - MAX sequence of recipe images table should be easy enough
     imgID = db.execute("SELECT MAX(id) FROM recipe_images")
 
+    dbAlias = 'max'
+    if os.environ["FLASK_ENV"] != 'production':
+        dbAlias = 'MAX(id)'
+
 
     return json.dumps({
         # 'filename':filename
@@ -743,7 +757,7 @@ def upload(recipe_id=None):
         #'url': 'https://%s.s3amazonaws.com/%s' % (S3_BUCKET, file_name)
         'url': presigned,
         'recipeID': recipe_id,
-        'imgID': imgID[0]['max']
+        'imgID': imgID[0][dbAlias]
     })
 
 @app.route("/edit/uploadEdit/<int:recipe_id>/<int:img_id>", methods=['POST'])

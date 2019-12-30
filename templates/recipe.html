@@ -50,9 +50,11 @@
         <br/>
         <br/>
         <h4>Recipe Instructions</h4>
-        <pre>
-          <p class="preFont">{{ recipeInfo[0]['instructions'] }}</p>
-        </pre>
+        <div style="word-wrap: break-word;">
+          <p>
+            <pre class="preFont">{{ recipeInfo[0]['instructions'] }}</pre>
+          </p>
+        </div>
         <br/>
         <h6>
             <small class="text-muted lead">Submitted By: {{ recipeInfo[0]['user_created'] }}</small>
